@@ -1,0 +1,19 @@
+{
+  "name": "terse",
+  "description": "Cuts Claude Code reply length in half and removes mannered prose. Writing rules for replies, docs, commits and subagents, plus a context meter for the status line.",
+  "version": "1.0.0",
+  "license": "MIT",
+  "keywords": [
+    "writing",
+    "style",
+    "concise",
+    "output-style",
+    "statusline",
+    "context"
+  ],
+  "author": {
+    "name": "Karl Lowenbjer"
+  },
+  "homepage": "https://github.com/lowenbjer/claude-terse",
+  "repository": "https://github.com/lowenbjer/claude-terse"
+}

@@ -1,0 +1,14 @@
+[
+ {"id": "s01", "kind": "chat", "prompt": "Explain the difference between git rebase and git merge, and when I should use each on a shared feature branch."},
+ {"id": "s02", "kind": "chat", "prompt": "We have a Flask API with a Postgres database. Requests time out under load once a day around 09:00. Where would you look first and why?"},
+ {"id": "s03", "kind": "chat", "prompt": "Should a small team use a monorepo or several repos for a web app, a worker service and a shared library? Give me the case for each and your lean."},
+ {"id": "s04", "kind": "chat", "prompt": "What does idempotency mean for an HTTP endpoint, and how do I make a payment-creating POST endpoint idempotent?"},
+ {"id": "s05", "kind": "chat", "prompt": "Our nightly ETL job takes 4 hours. It reads 20 CSV files, joins them in pandas, and writes to Postgres. What are the likely bottlenecks and the cheapest fix for each?"},
+ {"id": "s06", "kind": "chat", "prompt": "Explain what a database index is to a product manager in five sentences."},
+ {"id": "s07", "kind": "chat", "prompt": "Is it a bad idea to store JSON blobs in a relational database? When is it fine and when does it bite?"},
+ {"id": "s08", "kind": "chat", "prompt": "We got a pager alert: disk 92 percent full on the database host. Walk me through what you would check and in what order."},
+ {"id": "s09", "kind": "chat", "prompt": "Compare feature flags and long-lived branches for shipping a risky change. Which would you pick for a two-person team and why?"},
+ {"id": "s10", "kind": "chat", "prompt": "Review this function and tell me what is wrong with it:\n\ndef average(xs):\n    total = 0\n    for x in xs:\n        total += x\n    return total / len(xs)"},
+ {"id": "s11", "kind": "doc", "prompt": "Write a commit message for a change that adds a retry with exponential backoff to an HTTP client wrapper, three attempts, 200 ms base delay. Save it to {OUT}/commit.md."},
+ {"id": "s12", "kind": "doc", "prompt": "Write a short design note on adding a Redis cache in front of a slow reporting query, including what can go stale. Save it to {OUT}/design.md."}
+]
