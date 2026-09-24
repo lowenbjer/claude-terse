@@ -23,6 +23,6 @@ Words per prompt, vanilla to terse: 363 to 191, 427 to 196, 489 to 185, 804 to 2
 Findings:
 
 - Vanilla Fable 5.1 writes 0 dashes on this set. The dash rule changes nothing here and holds on the private set too.
-- Metaphor drops from 7.16 to 3.29 per 1,000 words and no further. None of the eight rule texts tested on the private set moved it below that.
-- The 40-prompt private set ran on Fable 5.1 only: 10,094 to 5,453 chat words and $24.3 to $11.8 at list price, see [docs/benchmark.md](../benchmark.md).
+- Metaphor drops from 7.16 to 3.29 per 1,000 words. None of the eight rule texts tested on the private set moved it below 3.29.
+- The 40-prompt private set on Fable 5.1: 10,094 to 5,453 chat words and $24.3 to $11.8 at list price, see [docs/benchmark.md](../benchmark.md).
 - Explore-type subagents ran Opus 5 and kept 13 em dashes per 1,000 words with the rules in their context. Fable subagents wrote 0.1 per 1,000 without any rules.

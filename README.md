@@ -1,6 +1,6 @@
 # terse
 
-A Claude Code plugin that cuts reply length in half and removes mannered prose. **46% fewer words, 51% lower cost, [measured](docs/benchmark.md).** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
+A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 51% fewer words, 36% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
 
 Terms used in the numbers below:
 
@@ -25,7 +25,7 @@ Measured on 12 public prompts, vanilla Claude Code against terse. Opus 5.5, effo
 | Slogans per 1k | 1.17 | 0.0 | -100% |
 | Metaphor per 1k | 3.69 | 1.07 | -71% |
 
-Fable 5.1 and Opus 5.5 at effort medium: [docs/models](docs/models/README.md). Method, prompts and the judge rubric: [docs/benchmark.md](docs/benchmark.md).
+Tables for Fable 5.1, and for Opus 5.5 at effort medium: [docs/models](docs/models/README.md). Method, prompts and the judge rubric: [docs/benchmark.md](docs/benchmark.md).
 
 ## Install
 
@@ -136,9 +136,9 @@ Both replies name scheduled jobs, pool exhaustion and cache expiry. The vanilla 
 
 - **Measured with Opus 5.5 and Fable 5.1 as the main agent.** Opus 5 and Sonnet 5 ran only as subagents. With the rules in context, Opus 5 kept 13 em dashes per 1k words and Sonnet put a dash in 1 reply of 5. No numbers exist for either as the main model. Per-model tables: [docs/models](docs/models/README.md).
 - **Metaphor drops by two thirds on Opus 5.5 and by half on Fable 5.1.** 3.7 to 1.1 per 1k words on Opus 5.5, 7.2 to 3.3 on Fable 5.1. No rule text tested moved it further.
-- **The 150-word cap shortens replies without enforcing the limit.** Replies got 46 to 54 percent shorter across two prompt sets. Long analysis questions still run over.
-- **Subagent output changed with the subagent model and did not change with the rules.** Explore-type subagents run Opus and kept 13 em dashes per 1k words with the rules in their context. Fable subagents produced 0.1 per 1k without any rules. To control it, set `CLAUDE_CODE_SUBAGENT_MODEL` to your main model, or ask for general-purpose subagents, which inherit it.
-- **Cost.** Output tokens fell 43 to 55 percent. Context tokens are most of the cost per call. Total cost fell 9 to 12 percent on the short public set. It fell 51 percent on a 40-prompt benchmark against a real codebase with a large CLAUDE.md, run on Fable 5.1.
+- **The 150-word cap shortens replies without enforcing the limit.** Chat words fell 46 to 69 percent across two prompt sets and two models. Long analysis questions still run over.
+- **Subagent output changed with the subagent model and did not change with the rules.** In a Fable 5.1 session, Explore-type subagents ran Opus 5 and kept 13 em dashes per 1k words with the rules in their context. Fable subagents produced 0.1 per 1k without any rules. In an Opus 5.5 session, the subagents ran Opus 5.5 and wrote 0.4 per 1k without the rules and 0 with them. To control it, set `CLAUDE_CODE_SUBAGENT_MODEL` to your main model, or ask for general-purpose subagents, which inherit it.
+- **Cost.** Output tokens fell 42 to 55 percent. Context tokens are most of the cost per call. Total cost fell 9 to 12 percent on the short public set. On 20 chat prompts against a real codebase with a large CLAUDE.md it fell 51 percent on Fable 5.1 and 36 percent on Opus 5.5.
 
 ## Uninstall
 
