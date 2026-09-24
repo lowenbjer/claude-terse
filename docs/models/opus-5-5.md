@@ -22,7 +22,7 @@ Words per prompt at effort high, vanilla to terse: 489 to 167, 636 to 158, 569 t
 
 Findings:
 
-- Vanilla Opus 5.5 ends 7 of 10 chat replies with an "In short:" paragraph or an offer such as "If you share the script, I can point to the exact lines." Terse ends 1 of 10 with a summary sentence.
+- Vanilla Opus 5.5 ends 7 of 10 chat replies with an "In short:" paragraph or an offer. One example: "If you share the script, I can point to the exact lines." Terse ends 1 of 10 with a summary sentence.
 - The 6 vanilla dashes are en dashes inside numeric ranges, 10 to 15 seconds and 10 to 100 times with a dash between the numbers. Terse writes "10 to 15 seconds".
 - The 3 metaphors the judge found in terse replies at effort high: "reads cleanly in git log", "Common culprits are", "the TTL remains as a backstop".
 - Effort changes length by 7% in vanilla and 2% in terse. The 150-word cap in the rules decides the length at either effort.
@@ -52,7 +52,7 @@ Words per prompt, terse 1.1.0: 185, 181, 180, 182, 173, 93, 195, 299, 175, 130. 
 
 - The 1.0.0 text left first person where vanilla had it: 7 hits in 12 replies against 18. Rule 19 brings it to 1 hit, "I" once in the design note.
 - The one reframe is "Filter rows before joining, not after", an ordering statement the scorer and judge both count.
-- Thinking tokens doubled and the reminder adds 70 uncached tokens per turn, so cost per run rose from $0.062 to $0.068 and sits 2% under vanilla on these one-turn prompts.
+- Thinking tokens doubled and the reminder adds 70 uncached tokens per turn, so cost per run rose from $0.062 to $0.068, 2% under vanilla on these one-turn prompts.
 
 ## Private set
 
@@ -74,7 +74,7 @@ Run on 2026-09-24, effort high, 40 prompts against a private codebase, see [docs
 | Subagent report dashes per 1k, 10 agent prompts | 0.4 | 0.0 | 0.0 | -100% |
 | List-price cost, 10 agent prompts | $5.8 | $4.8 | $4.4 | -24% |
 
-Claude Code chose Opus 5.5 for the Explore subagents in this session, where a Fable 5.1 session had used Opus 5. With the 1.0.0 text, bloat stayed near 3.4 per 1k because replies opened with a line about what the model was about to check. Rule 19 cuts that to 2.01. The 7 first-person hits left are quoted user phrases such as "my pipeline". Slogans went from 1 to 2 hits in 4,468 words, inside the noise of one run per prompt.
+Claude Code chose Opus 5.5 for the Explore subagents in this session, where a Fable 5.1 session had used Opus 5. With the 1.0.0 text, bloat stayed near 3.4 per 1k because replies opened with a line about what the model was about to check. Rule 19 cuts that to 2.01. The 7 first-person hits left are quoted user phrases such as "my pipeline". Slogans went from 1 to 2 hits in 4,468 words. One run per prompt cannot separate those two counts.
 
 Not measured: repeated runs of the same prompt.
 

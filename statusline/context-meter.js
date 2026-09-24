@@ -13,8 +13,8 @@ process.stdin.on('end', () => {
   const remaining = data.context_window ? data.context_window.remaining_percentage : null;
   let meter = '';
   if (remaining != null && !isNaN(remaining)) {
-    // Real fill shown. Colour thresholds sit at 3/4 of the usual 50/65/80,
-    // because retrieval quality degrades well before a large window fills.
+    // The percentage is the real fill. Colour thresholds are 37, 49 and 60, below the usual
+    // 50, 65 and 80, because retrieval quality degrades before a large window fills.
     const used = Math.max(0, Math.min(100, Math.round(100 - remaining)));
     let colour = '\x1b[32m';
     if (used >= 60) colour = '\x1b[5;31m\u{1F480} ';
