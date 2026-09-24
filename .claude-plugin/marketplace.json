@@ -10,8 +10,8 @@
     {
       "name": "terse",
       "source": "./",
-      "description": "Cuts Claude Code reply length in half and removes mannered prose. Writing rules for replies, docs, commits and subagents, plus a context meter for the status line.",
-      "version": "1.0.0",
+      "description": "Cuts Claude Code reply length in half and removes mannered prose. Writing rules for replies, docs, commits and subagents, a per-turn reminder against drift, plus a context meter for the status line.",
+      "version": "1.1.0",
       "author": {
         "name": "Karl Lowenbjer"
       },

@@ -1,0 +1,1 @@
+Apply terse:terse writing rules to every word: answer first; topic as subject, no "I"; 8 to 20 word sentences; numbers and names; literal words; no dashes; no "X, not Y"; no slogans; no narration; no closers; 150 words unless a document was asked for; on a redo, only the changes.

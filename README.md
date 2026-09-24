@@ -1,6 +1,6 @@
 # terse
 
-A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 51% fewer words, 36% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
+A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 54% fewer words, 32% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
 
 Terms used in the numbers below:
 
@@ -11,21 +11,23 @@ Terms used in the numbers below:
 - **Slogan**: a short line that sounds like a principle and states no mechanism. "The decision is the feature."
 - **Cadence**: rhythm built for effect, such as triads and punchline endings.
 - **Bloat**: sentences that add no fact, including narration like "I'll look at the code now".
-- **Output tokens**: what the model wrote. Output tokens are priced about five times higher than input tokens on Opus and Fable.
+- **First person**: "I", "me", "my", "let me" and their contractions. Sentences whose subject is the writer.
+- **Output tokens**: what the model wrote, thinking included. Output tokens are priced about five times higher than input tokens on Opus and Fable.
 
-Measured on 12 public prompts, vanilla Claude Code against terse. Opus 5.5, effort high, one run each.
+Measured on 12 public prompts, vanilla Claude Code against terse 1.1.0. Opus 5.5, effort high, one run each.
 
 | | vanilla | terse | change |
 |---|---|---|---|
-| Words, 10 chat replies | 5,959 | 1,876 | -69% |
-| Median reply | 636 words | 177 words | -72% |
-| Output tokens, 12 runs | 19,310 | 8,596 | -55% |
-| Style violations per 1k words (Opus judge) | 11.1 | 2.7 | -76% |
-| "X, not Y" reframes per 1k | 0.84 | 0.0 | -100% |
+| Words, 10 chat replies | 5,959 | 1,793 | -70% |
+| Median reply | 636 words | 181 words | -72% |
+| Output tokens, 12 runs | 19,310 | 10,528 | -45% |
+| Style violations per 1k words (Opus judge) | 11.1 | 1.1 | -90% |
+| First person per 1k | 2.79 | 0.47 | -83% |
+| "X, not Y" reframes per 1k | 0.84 | 0.56 | -33% |
 | Slogans per 1k | 1.17 | 0.0 | -100% |
-| Metaphor per 1k | 3.69 | 1.07 | -71% |
+| Metaphor per 1k | 3.69 | 0.0 | -100% |
 
-Tables for Fable 5.1, and for Opus 5.5 at effort medium: [docs/models](docs/models/README.md). Method, prompts and the judge rubric: [docs/benchmark.md](docs/benchmark.md).
+Tables for Fable 5.1, for Opus 5.5 at effort medium, and for the 1.0.0 rule text: [docs/models](docs/models/README.md). Method, prompts and the judge rubric: [docs/benchmark.md](docs/benchmark.md).
 
 ## Install
 
@@ -40,9 +42,11 @@ For the context meter, run `/terse:install-meter` once. It adds one `statusLine`
 
 ## What you get
 
-**The rules.** 18 rules and 10 before/after pairs, 487 words. First sentence is the answer you are looking for. One idea per sentence. No em dashes, no slogans, no "X, not Y" framing, no self-labeling, no closing offers, no narration of what is about to happen. Chat replies capped at 150 words unless you ask for a document or a walkthrough. Full text: [rules/RULES.md](rules/RULES.md).
+**The rules.** 20 rules and 12 before/after pairs, 596 words. First sentence is the answer you are looking for. One idea per sentence. Every sentence has the topic as its subject: no "I", no account of what was checked or would be done. No em dashes, no slogans, no "X, not Y" framing, no self-labeling, no closing offers. Chat replies capped at 150 words unless you ask for a document or a walkthrough. A redo sends only the delta. Full text: [rules/RULES.md](rules/RULES.md).
 
-**Delivery.** The rules ship as an output style. It applies while the plugin is enabled and sits in the main agent's system prompt. Subagents run their own system prompt, so a `SubagentStart` hook hands them the same text. No hook rewrites or blocks anything.
+**Delivery.** The rules ship as an output style. It applies while the plugin is enabled and is part of the main agent's system prompt. Subagents run their own system prompt, so a `SubagentStart` hook hands them the same text. No hook rewrites or blocks anything.
+
+**The reminder.** The output style is the first part of the context. After 20 or 30 turns it is 100k tokens before the current prompt, and the model's own recent replies become its nearest style examples. From there the replies show the answer in the last line, "I checked" sentences, dashes, "X, not Y" and slogans. A `UserPromptSubmit` hook adds the whole rule set, condensed to 280 characters, to every prompt next to your text. Cost per turn is about 70 input tokens. The text is [rules/REMINDER.md](rules/REMINDER.md).
 
 **The meter.** Model name and context fill as a percentage. Green below 37%, yellow from 37%, orange from 49%, skull from 60%. The thresholds are set below the usual 50, 65 and 80 percent. Three studies show retrieval quality dropping well before a large window fills:
 
@@ -121,24 +125,25 @@ Prompt, run once with each setup on Opus 5.5: "We have a Flask API with a Postgr
 >
 > If you share the scheduler config, the SQLAlchemy engine settings and the gunicorn command, I can check the connection arithmetic for you.
 
-**terse, 158 words:**
+**terse, 181 words:**
 
-> I would look first at `pg_stat_activity` during the 08:55 to 09:15 window. A fixed daily time usually means a scheduled job or a login surge, and that view separates the two:
+> Start with whatever else is scheduled for 09:00. A timeout at the same time every day probably has a scheduled trigger behind it. Organic traffic growth does not hit one fixed minute.
 >
-> - **Scheduled jobs:** Check cron, pg_cron, Celery beat and backup schedules for anything set to 09:00. Common culprits are `pg_dump`, `REFRESH MATERIALIZED VIEW`, a manual `VACUUM` and ETL or report queries. These hold locks or saturate disk IO. In `pg_stat_activity`, look for rows with `wait_event_type = 'Lock'` or `'IO'`.
-> - **Connection pool exhaustion:** SQLAlchemy defaults to `pool_size=5`, `max_overflow=10` and `pool_timeout=30`. A morning spike queues requests for 30 seconds, then they fail. Compare gunicorn workers × pool size against Postgres `max_connections` (default 100).
-> - **Cache stampede:** Keys with a 24-hour TTL, set at 09:00 once, all expire together each day. Every request then hits Postgres at the same moment.
-> - **Slow queries:** Enable `pg_stat_statements` and set `log_min_duration_statement = 500ms`. This names the queries that slow down at 09:00.
+> 1. **Cron and batch jobs.** Check crontab, Celery beat, `pg_cron` and CI schedules for 09:00 entries. Report builds, ETL loads and `pg_dump` backups can hold locks or saturate disk I/O.
+> 2. **`pg_stat_activity` from 08:55 to 09:15.** Sample it every 10 seconds. Rows with `wait_event_type = 'Lock'` or `state = 'idle in transaction'` point to the blocking session.
+> 3. **Connection pool size.** SQLAlchemy defaults to `pool_size=5` and `max_overflow=10` per process. Multiply by Gunicorn workers and compare the total with Postgres `max_connections`. An exhausted pool makes requests queue until they time out.
+> 4. **`pg_stat_statements`.** Compare mean query time inside that window with the rest of the day. A slow query that only shows up then usually comes from a job or from stale statistics.
+> 5. **Cache expiry.** A Redis TTL of 24 hours set at 09:00 makes every cached key expire together. All of those requests then hit Postgres at once.
 
-Both replies name scheduled jobs, pool exhaustion and cache expiry. The vanilla one adds four headers, a recommendation section that repeats steps 1 to 3, and an offer to check the config. The terse one gives the pool defaults, the connection arithmetic and the two settings to enable.
+Both replies name scheduled jobs, pool exhaustion and cache expiry. The vanilla one adds four headers, a recommendation section that repeats steps 1 to 3, and an offer to check the config. The terse one gives the pool defaults, the sampling interval and the two views to query, with no sentence about the writer.
 
 ## Measured limits
 
 - **Measured with Opus 5.5 and Fable 5.1 as the main agent.** Opus 5 and Sonnet 5 ran only as subagents. With the rules in context, Opus 5 kept 13 em dashes per 1k words and Sonnet put a dash in 1 reply of 5. No numbers exist for either as the main model. Per-model tables: [docs/models](docs/models/README.md).
-- **Metaphor drops by two thirds on Opus 5.5 and by half on Fable 5.1.** 3.7 to 1.1 per 1k words on Opus 5.5, 7.2 to 3.3 on Fable 5.1. No rule text tested moved it further.
-- **The 150-word cap shortens replies without enforcing the limit.** Chat words fell 46 to 69 percent across two prompt sets and two models. Long analysis questions still run over.
+- **Metaphor drops to 0 on the public set and by half on the private set.** Opus 5.5 with the 1.1.0 text: 3.69 to 0.0 per 1k on 12 public prompts, 3.09 to 1.57 on 20 private prompts. Fable 5.1 with the 1.0.0 text: 7.2 to 3.3 on the public set.
+- **The 150-word cap shortens replies without enforcing the limit.** Chat words fell 46 to 70 percent across two prompt sets and two models. Long analysis questions still run over.
 - **Subagent output changed with the subagent model and did not change with the rules.** In a Fable 5.1 session, Explore-type subagents ran Opus 5 and kept 13 em dashes per 1k words with the rules in their context. Fable subagents produced 0.1 per 1k without any rules. In an Opus 5.5 session, the subagents ran Opus 5.5 and wrote 0.4 per 1k without the rules and 0 with them. To control it, set `CLAUDE_CODE_SUBAGENT_MODEL` to your main model, or ask for general-purpose subagents, which inherit it.
-- **Cost.** Output tokens fell 42 to 55 percent. Context tokens are most of the cost per call. Total cost fell 9 to 12 percent on the short public set. On 20 chat prompts against a real codebase with a large CLAUDE.md it fell 51 percent on Fable 5.1 and 36 percent on Opus 5.5.
+- **Cost.** Output tokens fell 42 to 55 percent. Context tokens are most of the cost per call. Total cost fell 2 percent on the short public set with the 1.1.0 text and 9 to 12 percent with the 1.0.0 text: the reminder adds about 70 uncached tokens per turn, and the model thought for 4,155 tokens over 12 runs against 2,150 without it. On 20 chat prompts against a real codebase with a large CLAUDE.md, cost fell 51 percent on Fable 5.1 with the 1.0.0 text and 32 percent on Opus 5.5 with the 1.1.0 text.
 
 ## Uninstall
 
