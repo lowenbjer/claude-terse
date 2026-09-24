@@ -3,13 +3,22 @@
 Usage: python3 score.py < reply.txt   (prints JSON)
        or import score_text(text) -> dict
 
-Counts the checkable items from rules/RULES.md.
+Counts the checkable items from rules/RULES.md: dashes, first person, banned
+phrases, closers, "X, not Y", sentence length.
 The judge in judge.py covers metaphor and cadence.
 """
 import json
 import sys
 
 DASHES = ("—", "–")
+
+# rule 19: first-person words, the writer as the subject of the sentence
+FIRST_PERSON = {"i", "i'd", "i'm", "i've", "i'll", "me", "my", "mine", "myself"}
+STRIP = "\"'()[]{}.,;:!?*`\u201c\u201d\u2018\u2019"
+
+
+def first_person(words):
+    return sum(1 for w in words if w.lower().replace("\u2019", "'").strip(STRIP) in FIRST_PERSON)
 
 # self-labeling / honesty flagging / mannered stock phrases / banned words
 PHRASES = [
@@ -71,6 +80,7 @@ def score_text(text):
         "words": nwords,
         "sentences": len(sents),
         "dashes": sum(text.count(d) for d in DASHES),
+        "first_person": first_person(words),
         "parens": text.count("("),
         "phrase_hits": phrase_hits,
         "closer_hits": closer_hits,

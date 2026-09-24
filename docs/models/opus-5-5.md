@@ -28,27 +28,54 @@ Findings:
 - Effort changes length by 7% in vanilla and 2% in terse. The 150-word cap in the rules decides the length at either effort.
 - Vanilla Opus 5.5 writes 29% more words than vanilla Fable 5.1 on the same prompts and has 40% fewer judged violations per 1,000 words. Terse replies on Opus 5.5 are 12% shorter than terse replies on Fable 5.1 and have 38% of their violation rate.
 
+## Version 1.1.0 rerun
+
+Run on 2026-09-24, effort high, same 12 prompts, with the 20-rule text and the per-turn reminder. The 1.0.0 column repeats the high effort terse numbers above.
+
+| | vanilla | terse 1.0.0 | terse 1.1.0 | change, vanilla to 1.1.0 |
+|---|---|---|---|---|
+| Words, 10 chat replies | 5,959 | 1,876 | 1,793 | -70% |
+| Median reply | 636 words | 177 words | 181 words | -72% |
+| Output tokens, 12 runs | 19,310 | 8,596 | 10,528 | -45% |
+| Thinking tokens, 12 runs | 2,280 | 2,150 | 4,155 | +82% |
+| List-price cost, 12 runs | $0.84 | $0.74 | $0.82 | -2% |
+| First person per 1k words | 2.79 | 3.23 | 0.47 | -83% |
+| Judge violations per 1k words | 11.1 | 2.7 | 1.1 | -90% |
+| Metaphor per 1k | 3.69 | 1.07 | 0.0 | -100% |
+| "X, not Y" reframes per 1k | 0.84 | 0.0 | 0.56 | -33% |
+| Slogans per 1k | 1.17 | 0.0 | 0.0 | -100% |
+| Cadence per 1k | 1.34 | 0.0 | 0.0 | -100% |
+| Bloat per 1k | 3.02 | 1.07 | 0.56 | -81% |
+| Closers per 1k | 1.17 | 0.53 | 0.0 | -100% |
+
+Words per prompt, terse 1.1.0: 185, 181, 180, 182, 173, 93, 195, 299, 175, 130. Documents: 136 and 206.
+
+- The 1.0.0 text left first person where vanilla had it: 7 hits in 12 replies against 18. Rule 19 brings it to 1 hit, "I" once in the design note.
+- The one reframe is "Filter rows before joining, not after", an ordering statement the scorer and judge both count.
+- Thinking tokens doubled and the reminder adds 70 uncached tokens per turn, so cost per run rose from $0.062 to $0.068 and sits 2% under vanilla on these one-turn prompts.
+
 ## Private set
 
-Run on 2026-09-24, effort high, 40 prompts against a private codebase, see [docs/benchmark.md](../benchmark.md) for the prompt mix and the baseline definition. The baseline has the 1,886-word rule text in the project CLAUDE.md and nine other plugins enabled. The terse run has the plugin and nothing else.
+Run on 2026-09-24, effort high, 40 prompts against a private codebase, see [docs/benchmark.md](../benchmark.md) for the prompt mix and the baseline definition. The baseline has the 1,886-word rule text in the project CLAUDE.md and nine other plugins enabled. The terse runs have the plugin and nothing else, once with the 1.0.0 text and once with 1.1.0.
 
-| | baseline | terse | change |
-|---|---|---|---|
-| Chat words, 20 prompts | 9,705 | 4,782 | -51% |
-| Median reply | 501 words | 211 words | -58% |
-| Output tokens, 20 prompts | 75,718 | 44,057 | -42% |
-| List-price cost, 20 prompts | $8.4 | $5.4 | -36% |
-| Judge violations per 1k words | 9.9 | 6.3 | -36% |
-| Metaphor per 1k | 3.09 | 1.88 | -39% |
-| "X, not Y" reframes per 1k (judge) | 1.13 | 0.21 | -81% |
-| Slogans per 1k | 0.52 | 0.21 | -60% |
-| Cadence per 1k | 1.24 | 0.42 | -66% |
-| Bloat per 1k | 3.50 | 3.35 | -4% |
-| Subagent report dashes per 1k, 10 agent prompts | 0.4 | 0.0 | -100% |
-| List-price cost, 10 agent prompts | $5.8 | $4.8 | -17% |
+| | baseline | terse 1.0.0 | terse 1.1.0 | change, baseline to 1.1.0 |
+|---|---|---|---|---|
+| Chat words, 20 prompts | 9,705 | 4,782 | 4,468 | -54% |
+| Median reply | 501 words | 211 words | 193 words | -61% |
+| Output tokens, 20 prompts | 75,718 | 44,057 | 43,747 | -42% |
+| List-price cost, 20 prompts | $8.4 | $5.4 | $5.7 | -32% |
+| First person per 1k words | 5.15 | 4.18 | 1.57 | -70% |
+| Judge violations per 1k words | 9.9 | 6.3 | 4.3 | -57% |
+| Metaphor per 1k | 3.09 | 1.88 | 1.57 | -49% |
+| "X, not Y" reframes per 1k (judge) | 1.13 | 0.21 | 0.0 | -100% |
+| Slogans per 1k | 0.52 | 0.21 | 0.45 | -13% |
+| Cadence per 1k | 1.24 | 0.42 | 0.22 | -82% |
+| Bloat per 1k | 3.50 | 3.35 | 2.01 | -43% |
+| Subagent report dashes per 1k, 10 agent prompts | 0.4 | 0.0 | 0.0 | -100% |
+| List-price cost, 10 agent prompts | $5.8 | $4.8 | $4.4 | -24% |
 
-Claude Code chose Opus 5.5 for the Explore subagents in this session, where a Fable 5.1 session had used Opus 5. Bloat stays near 3.4 per 1k because the replies still open with a line about what the model is about to check.
+Claude Code chose Opus 5.5 for the Explore subagents in this session, where a Fable 5.1 session had used Opus 5. With the 1.0.0 text, bloat stayed near 3.4 per 1k because replies opened with a line about what the model was about to check. Rule 19 cuts that to 2.01. The 7 first-person hits left are quoted user phrases such as "my pipeline". Slogans went from 1 to 2 hits in 4,468 words, inside the noise of one run per prompt.
 
 Not measured: repeated runs of the same prompt.
 
-Before and after for the Flask prompt, vanilla 636 words and terse 158 words, are in the [README](../../README.md#before-and-after).
+Before and after for the Flask prompt, vanilla 636 words and terse 1.1.0 at 181 words, are in the [README](../../README.md#before-and-after).
