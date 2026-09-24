@@ -1,47 +1,44 @@
 # Benchmark
 
-Two prompt sets ran through the same runner, scorer and judge. Each prompt ran once through `claude -p` with `--output-format stream-json`. Model Fable 5.1 at effort high, September 2026.
+Two prompt sets ran through the same runner, scorer and judge. Each prompt ran once through `claude -p` with `--output-format stream-json`, September 2026.
 
 ## Public set
 
 12 prompts in [bench/showcase_prompts.json](../bench/showcase_prompts.json): 10 engineering questions, 2 short documents. `{OUT}` in the two document prompts is the output directory the runner substituted. Run in an empty directory with no CLAUDE.md and no other plugins.
 
-| | vanilla | terse |
-|---|---|---|
-| Chat replies | 10 | 10 |
-| Words | 4,610 | 2,125 |
-| Median words | 500 | 196 |
-| Output tokens, all 12 runs | 13,453 | 7,661 |
-| Em or en dashes | 0 | 0 |
-| Judge violations per 1k words | 18.4 | 7.1 |
-| Metaphor | 7.16 | 3.29 |
-| Reframes ("X, not Y") | 1.95 | 0.0 |
-| Cadence (triads, punchlines) | 3.69 | 1.41 |
-| Slogans | 1.52 | 0.0 |
-| Bloat | 3.90 | 2.35 |
-| List-price cost, 12 runs | $1.93 | $1.75 |
-
-Words per prompt, vanilla to terse: 363 to 191, 427 to 196, 489 to 185, 804 to 252, 608 to 261, 142 to 103, 500 to 218, 537 to 395, 530 to 177, 210 to 147. Documents: 85 to 107 and 199 to 106.
+Results per model are in [docs/models](models/README.md): [Opus 5.5](models/opus-5-5.md) at effort high and medium, [Fable 5.1](models/fable-5-1.md) at effort high.
 
 ## Private set
 
-40 prompts adapted from real sessions against a private codebase with its own CLAUDE.md: 20 analysis questions, 10 documents, 10 tasks that force a subagent. Only aggregates are published. Live setup against the plugin:
+40 prompts adapted from real sessions against a private codebase with its own CLAUDE.md: 20 analysis questions, 10 documents, 10 tasks that force a subagent. Effort high on both models. Only aggregates are published.
 
-| | live setup | terse |
-|---|---|---|
-| Chat words, 20 prompts | 10,094 | 5,453 |
-| Output tokens | 109,751 | 50,182 |
-| List-price cost | $24.3 | $11.8 |
-| "X, not Y" per 1k (scorer) | 1.29 | 0.18 |
-| Judge violations per 1k | 14.3 | 10.5 |
-| Subagent report dashes per 1k (Opus subagents) | 12.7 | 13.6 |
+The baseline differs by model. The Fable 5.1 baseline, run 2026-09-22, is a working setup: a 1,886-word user CLAUDE.md holding the writing rules, a memory index, nine plugins and hooks. The Opus 5.5 baseline, run 2026-09-24, puts the same 1,886-word rules in the project CLAUDE.md and enables the same nine plugins. It has no memory index and no hooks. On Fable that arrangement wrote 9,606 chat words against the working setup's 10,094.
 
-The same set chose the rule text and its placement across eight configurations. Findings:
+| | Fable 5.1 baseline | Fable 5.1 terse | Opus 5.5 baseline | Opus 5.5 terse |
+|---|---|---|---|---|
+| Chat words, 20 prompts | 10,094 | 5,453 (-46%) | 9,705 | 4,782 (-51%) |
+| Median reply | 530 words | 220 words | 501 words | 211 words |
+| Output tokens, 20 prompts | 109,751 | 50,182 (-54%) | 75,718 | 44,057 (-42%) |
+| List-price cost, 20 prompts | $24.3 | $11.8 (-51%) | $8.4 | $5.4 (-36%) |
+| "X, not Y" per 1k (scorer) | 1.29 | 0.18 | 1.65 | 0.63 |
+| Judge violations per 1k | 14.3 | 10.5 (-27%) | 9.9 | 6.3 (-36%) |
+| Judge metaphor per 1k | 3.57 | 3.67 | 3.09 | 1.88 |
+| Judge reframes per 1k | 1.29 | 0.92 | 1.13 | 0.21 |
+| Judge slogans per 1k | 1.29 | 1.28 | 0.52 | 0.21 |
+| Judge cadence per 1k | 2.58 | 1.28 | 1.24 | 0.42 |
+| Judge bloat per 1k | 5.25 | 3.48 | 3.50 | 3.35 |
+| Subagent model chosen by Claude Code | Opus 5 | Opus 5 | Opus 5.5 | Opus 5.5 |
+| Subagent report dashes per 1k, 10 agent prompts | 12.7 | 13.6 | 0.4 | 0.0 |
+| List-price cost, 10 agent prompts | $15.3 | $8.4 | $5.8 | $4.8 |
+
+Document prompts run with a 14-turn budget. The Opus 5.5 baseline hit it in 4 of 10 document runs and terse in 1 of 10, so document words are not compared.
+
+The same set ran against eight rule texts and placements before the plugin text was chosen. Findings:
 
 - Concrete bans hold in every configuration: 0 dashes in 120 chat replies and 57 documents.
-- Rule placement and wording move the judged categories by 15 to 50 percent. Reframes halve, cadence drops 60 percent. Metaphor did not move in any configuration.
+- Rule placement and wording move the judged categories by 15 to 50 percent. Reframes drop 50 percent and cadence 60 percent. Metaphor did not move in any configuration.
 - Disabling other plugins had no style effect and saved 5.7k context tokens per call.
-- Subagent dashes depend on the subagent model. Forcing Fable removed them at 28 percent higher cost per agent run. Giving Opus subagents the rule text did not.
+- Subagent dashes depend on the subagent model. Forcing Fable removed them at 28 percent higher cost per agent run. Giving Opus 5 subagents the rule text did not. Opus 5.5 subagents wrote 3 dashes in 7,735 words without the rules and 0 in 5,494 words with them.
 
 ## Scorer and judge
 
@@ -49,4 +46,4 @@ The same set chose the rule text and its placement across eight configurations. 
 
 [bench/judge.py](../bench/judge.py) sends each reply to Opus 5 with a nine-item rubric and asks for quotes and a count. The items: metaphor, reframes, self-labeling, reader grading, cadence, closers, bloat, formal register, slogans. One judge call per reply. Judge cost was about $0.07 per reply at list price.
 
-Both scripts are included so the numbers can be reproduced on your own prompts.
+Both scripts are in [bench/](../bench) for runs on other prompts.

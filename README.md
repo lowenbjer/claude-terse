@@ -1,6 +1,6 @@
 # terse
 
-A Claude Code plugin that cuts reply length in half and removes mannered prose. **46% fewer words, 51% lower cost, [measured](docs/benchmark.md).** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
+A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 51% fewer words, 36% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
 
 Terms used in the numbers below:
 
@@ -13,19 +13,19 @@ Terms used in the numbers below:
 - **Bloat**: sentences that add no fact, including narration like "I'll look at the code now".
 - **Output tokens**: what the model wrote. Output tokens are priced about five times higher than input tokens on Opus and Fable.
 
-Measured on 12 public prompts, vanilla Claude Code against terse. Fable 5.1, effort high, one run each.
+Measured on 12 public prompts, vanilla Claude Code against terse. Opus 5.5, effort high, one run each.
 
 | | vanilla | terse | change |
 |---|---|---|---|
-| Words, 10 chat replies | 4,610 | 2,125 | -54% |
-| Median reply | 500 words | 196 words | -61% |
-| Output tokens, 12 runs | 13,453 | 7,661 | -43% |
-| Style violations per 1k words (Opus judge) | 18.4 | 7.1 | -61% |
-| "X, not Y" reframes per 1k | 1.95 | 0.0 | -100% |
-| Slogans per 1k | 1.52 | 0.0 | -100% |
-| Metaphor per 1k | 7.16 | 3.29 | -54% |
+| Words, 10 chat replies | 5,959 | 1,876 | -69% |
+| Median reply | 636 words | 177 words | -72% |
+| Output tokens, 12 runs | 19,310 | 8,596 | -55% |
+| Style violations per 1k words (Opus judge) | 11.1 | 2.7 | -76% |
+| "X, not Y" reframes per 1k | 0.84 | 0.0 | -100% |
+| Slogans per 1k | 1.17 | 0.0 | -100% |
+| Metaphor per 1k | 3.69 | 1.07 | -71% |
 
-Method, prompts and the judge rubric: [docs/benchmark.md](docs/benchmark.md).
+Tables for Fable 5.1, and for Opus 5.5 at effort medium: [docs/models](docs/models/README.md). Method, prompts and the judge rubric: [docs/benchmark.md](docs/benchmark.md).
 
 ## Install
 
@@ -54,53 +54,91 @@ The thresholds are the three numbers near the top of [statusline/context-meter.j
 
 ## Before and after
 
-Prompt, run once with each setup: "We have a Flask API with a Postgres database. Requests time out under load once a day around 09:00. Where would you look first and why?"
+Prompt, run once with each setup on Opus 5.5: "We have a Flask API with a Postgres database. Requests time out under load once a day around 09:00. Where would you look first and why?"
 
-**Vanilla, 427 words:**
+**Vanilla, 636 words:**
 
-> Start with the Postgres connection pool and what is scheduled at 09:00. A failure that recurs at the same clock time every day is almost never a code bug in the request path. It is a periodic external event colliding with your morning traffic peak.
+> # Where I'd look first for the 09:00 timeouts
 >
-> First things to check, in order:
+> The 09:00 timing is the most useful clue. Before looking at any code, find out which of these two things is happening:
 >
-> - **Scheduled jobs at or just before 09:00.** Look at cron, Celery beat, Kubernetes CronJobs, and any BI or reporting tool that runs a morning extract. A heavy report query, a nightly ETL running late, or a backup or VACUUM that overlaps with the traffic ramp will hold locks and saturate I/O. Cross-check the database logs and the job scheduler for anything landing in the 08:45 to 09:15 window.
+> 1. **Traffic goes up at 09:00.** The start of the workday brings logins, dashboards and syncs. That's a capacity problem.
+> 2. **Traffic stays flat but something else runs at 09:00.** That's contention from a scheduled job.
 >
-> - **Connection pool exhaustion.** Flask with gunicorn or uwsgi typically runs many workers, each holding its own SQLAlchemy pool. At the 09:00 login spike the total connections can exceed Postgres max_connections, or the pool can hit its pool_size plus max_overflow and requests block on checkout until pool_timeout. That looks exactly like a request timeout. Check `pg_stat_activity` at 09:00 for connection counts and for sessions stuck in `idle in transaction` or waiting on locks.
+> Compare your request-rate graph at 09:00 with other hours. That one check tells you which half of the problem you're in.
 >
-> - **Lock contention.** Query `pg_locks` joined to `pg_stat_activity` during the incident. One long transaction from a batch job blocking a hot table will stall every web request that touches it. Enable log_lock_waits so the database records blocked queries for you.
+> ## 1. Check what runs at 09:00
 >
-> - **Cache expiry or cold state.** If a cache layer or materialized view refreshes on a daily schedule, 09:00 traffic may be hitting an empty cache and stampeding the database. Check TTLs and refresh schedules.
+> Look at crontabs, `pg_cron`, Celery beat, Kubernetes CronJobs, backups (`pg_dump`), ETL and report jobs, and `REFRESH MATERIALIZED VIEW`. Also check for cache entries that all expire at the same moment, because that sends every request to the database at once.
 >
-> - **Autovacuum and checkpoints.** Less likely to be clock-aligned, but check whether the traffic burst triggers a checkpoint spike or an autovacuum on a large table at the same time.
+> Be careful with timezones. 09:00 local might be 07:00 UTC in the scheduler config, so grep for both.
 >
-> Why the pool and the scheduler come first: they explain both halves of the symptom. The scheduler explains the time of day. The pool explains why the failure mode is a timeout rather than an error, since blocked connection checkouts fail silently and slowly.
+> Common problems:
+> - A `REFRESH MATERIALIZED VIEW` without `CONCURRENTLY`, a bulk `UPDATE`, or a migration. Each of these takes locks that API queries then wait behind.
+> - A backup or batch job using up disk I/O.
 >
-> To confirm quickly, capture `pg_stat_activity`, `pg_locks`, and gunicorn worker status every minute from 08:50 to 09:20 tomorrow. Enable log_min_duration_statement at around one second and log_lock_waits so tomorrow's incident produces evidence. Compare the slow queries against what is normal at 14:00. Whatever differs is your culprit.
+> ## 2. Capture what Postgres is doing during the window
 >
-> If none of those show anything, then look at infrastructure: a shared database host with another tenant's morning job, a load balancer health check change, or an autoscaler that scales the app tier faster than the database can accept connections.
+> This gives you the fastest real answer. Snapshot `pg_stat_activity` every 10–15 seconds from 08:55 to 09:15:
+>
+> ```sql
+> SELECT now(), state, wait_event_type, wait_event,
+>        now() - xact_start AS xact_age, left(query, 120) AS query, application_name
+> FROM pg_stat_activity
+> WHERE datname = current_database()
+> ORDER BY xact_start NULLS LAST;
+> ```
+>
+> Read the results like this:
+> - **Lots of `wait_event_type = 'Lock'`:** something is holding locks. Join with `pg_locks` (or use `pg_blocking_pids()`) to find the blocking session. It's usually the scheduled job from step 1.
+> - **Lots of `idle in transaction`:** the app opens transactions and doesn't close them quickly. That holds connections and locks.
+> - **Many `active` sessions running the same query:** one query is slow at scale, often a missing index or a stale plan. Check `pg_stat_statements` for that window.
+> - **Session count close to `max_connections`:** you're running out of connections (see step 3).
+>
+> Also set `log_min_duration_statement` (e.g. 500ms) and `log_lock_waits = on` so the next occurrence leaves a record.
+>
+> ## 3. Check for app-side connection pool exhaustion
+>
+> This is the most common cause of timeouts in Flask + SQLAlchemy apps. Search the app logs around 09:00 for:
+>
+> ```
+> QueuePool limit of size 5 overflow 10 reached, connection timed out
+> ```
+>
+> Then do the arithmetic: gunicorn workers × threads × (`pool_size` + `max_overflow`) × number of instances, compared with Postgres `max_connections`. When traffic jumps, requests queue for a pooled connection until they time out. Postgres can look almost idle while this happens.
+>
+> Also check for sessions that aren't returned to the pool. The usual causes are a missing `db.session.remove()` or teardown handler, or slow external HTTP calls made inside a transaction.
+>
+> ## 4. Find out which timeout is firing
+>
+> The load balancer (often 60s), gunicorn `--timeout` (30s by default) and SQLAlchemy `pool_timeout` (30s by default) each point to a different place:
+> - Gunicorn `WORKER TIMEOUT` messages mean the workers are blocked. They're either waiting on the database or there are too few sync workers.
+> - A 504 from the load balancer with no gunicorn error means requests are queuing before they reach a worker.
+>
+> ## My recommendation
+>
+> Run the `pg_stat_activity` snapshot loop at tomorrow's 09:00. At the same time, grep the app logs for the pool error and list every scheduled job near 09:00. That will very likely narrow it to one of two causes: a job holding locks, or pool exhaustion under the morning traffic. The fix is very different for each: move or rewrite the job, or resize the pool and add a connection pooler such as PgBouncer.
+>
+> If you share the scheduler config, the SQLAlchemy engine settings and the gunicorn command, I can check the connection arithmetic for you.
 
-**terse, 196 words:**
+**terse, 158 words:**
 
-> Cron and scheduled jobs first. A daily 09:00 timeout points to a clock-driven event, and the two usual sources are a batch job that holds Postgres locks or saturates the connection pool, and the morning login surge.
+> I would look first at `pg_stat_activity` during the 08:55 to 09:15 window. A fixed daily time usually means a scheduled job or a login surge, and that view separates the two:
 >
-> Check in this order:
->
-> 1. **Postgres activity at 09:00.** Query `pg_stat_activity` for long-running or `idle in transaction` sessions, and `pg_locks` for waiters. A nightly VACUUM, backup, report or ETL job that overruns into 09:00 explains lock waits and I/O saturation.
-> 2. **Connection pool.** Compare Flask worker count times pool size against `max_connections`. If a batch job consumes 20 connections, the API queues on pool checkout and times out.
-> 3. **Traffic and worker saturation.** Plot request rate and gunicorn/uwsgi busy workers at 08:55 to 09:15. If workers max out with normal DB latency, the fix is more workers or async I/O.
-> 4. **Slow query log.** Enable `log_min_duration_statement` at 500 ms for one morning. Slow queries at 09:00 with fast ones at 10:00 confirm contention.
-> 5. **Autovacuum and checkpoints.** Check `pg_stat_bgwriter` for checkpoint spikes and `pg_stat_user_tables` for autovacuum runs near 09:00.
->
-> Correlate one thing: the `crontab -l`, systemd timers and any scheduler (Celery beat, Airflow) for entries between 08:00 and 09:00.
+> - **Scheduled jobs:** Check cron, pg_cron, Celery beat and backup schedules for anything set to 09:00. Common culprits are `pg_dump`, `REFRESH MATERIALIZED VIEW`, a manual `VACUUM` and ETL or report queries. These hold locks or saturate disk IO. In `pg_stat_activity`, look for rows with `wait_event_type = 'Lock'` or `'IO'`.
+> - **Connection pool exhaustion:** SQLAlchemy defaults to `pool_size=5`, `max_overflow=10` and `pool_timeout=30`. A morning spike queues requests for 30 seconds, then they fail. Compare gunicorn workers × pool size against Postgres `max_connections` (default 100).
+> - **Cache stampede:** Keys with a 24-hour TTL, set at 09:00 once, all expire together each day. Every request then hits Postgres at the same moment.
+> - **Slow queries:** Enable `pg_stat_statements` and set `log_min_duration_statement = 500ms`. This names the queries that slow down at 09:00.
 
-Both replies name the same causes. The vanilla one adds "fail silently and slowly", "Whatever differs is your culprit", and a closing paragraph on what to do if nothing shows. The terse one gives the queries to run and the numbers to compare.
+Both replies name scheduled jobs, pool exhaustion and cache expiry. The vanilla one adds four headers, a recommendation section that repeats steps 1 to 3, and an offer to check the config. The terse one gives the pool defaults, the connection arithmetic and the two settings to enable.
 
 ## Measured limits
 
-- **Measured with Fable 5.1 as the main agent only.** Opus 5 and Sonnet 5 ran only as subagents. With the rules in context, Opus kept 13 em dashes per 1k words and Sonnet put a dash in 1 reply of 5. No numbers exist for either as the main model.
-- **Metaphor drops by half.** 7.2 to 3.3 per 1k words on the public set. No rule text tested moved it further.
-- **The 150-word cap shortens replies without enforcing the limit.** Replies got 46 to 54 percent shorter across two prompt sets. Long analysis questions still run over.
-- **Subagent output changed with the subagent model and did not change with the rules.** Explore-type subagents run Opus and kept 13 em dashes per 1k words with the rules in their context. Fable subagents produced 0.1 per 1k without any rules. To control it, set `CLAUDE_CODE_SUBAGENT_MODEL` to your main model, or ask for general-purpose subagents, which inherit it.
-- **Cost.** Output tokens fell 43 to 54 percent. Context tokens are most of the cost per call. Total cost fell 9 percent on the short public set. It fell 51 percent on a 40-prompt benchmark against a real codebase with a large CLAUDE.md.
+- **Measured with Opus 5.5 and Fable 5.1 as the main agent.** Opus 5 and Sonnet 5 ran only as subagents. With the rules in context, Opus 5 kept 13 em dashes per 1k words and Sonnet put a dash in 1 reply of 5. No numbers exist for either as the main model. Per-model tables: [docs/models](docs/models/README.md).
+- **Metaphor drops by two thirds on Opus 5.5 and by half on Fable 5.1.** 3.7 to 1.1 per 1k words on Opus 5.5, 7.2 to 3.3 on Fable 5.1. No rule text tested moved it further.
+- **The 150-word cap shortens replies without enforcing the limit.** Chat words fell 46 to 69 percent across two prompt sets and two models. Long analysis questions still run over.
+- **Subagent output changed with the subagent model and did not change with the rules.** In a Fable 5.1 session, Explore-type subagents ran Opus 5 and kept 13 em dashes per 1k words with the rules in their context. Fable subagents produced 0.1 per 1k without any rules. In an Opus 5.5 session, the subagents ran Opus 5.5 and wrote 0.4 per 1k without the rules and 0 with them. To control it, set `CLAUDE_CODE_SUBAGENT_MODEL` to your main model, or ask for general-purpose subagents, which inherit it.
+- **Cost.** Output tokens fell 42 to 55 percent. Context tokens are most of the cost per call. Total cost fell 9 to 12 percent on the short public set. On 20 chat prompts against a real codebase with a large CLAUDE.md it fell 51 percent on Fable 5.1 and 36 percent on Opus 5.5.
 
 ## Uninstall
 
