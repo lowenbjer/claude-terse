@@ -45,8 +45,8 @@ The same set ran against eight rule texts and placements before the plugin text 
 
 ## Scorer and judge
 
-[bench/score.py](../bench/score.py) counts the items a script can check: dashes, first-person words ("I", "me", "my", "let me"), a banned phrase list, ", not" sentences excluding numeric corrections, parentheses, closing offers, words.
+[bench/score.py](../bench/score.py) counts the checkable items: dashes, first-person words ("I", "me", "my", "let me"), banned phrases, closing offers, parentheses and words. It also counts ", not" sentences, excluding numeric corrections such as "11, not 12".
 
 [bench/judge.py](../bench/judge.py) sends each reply to Opus 5 with a nine-item rubric and asks for quotes and a count. The items: metaphor, reframes, self-labeling, reader grading, cadence, closers, bloat, formal register, slogans. One judge call per reply. Judge cost was about $0.07 per reply at list price.
 
-Both scripts are in [bench/](../bench) for runs on other prompts.
+Both scripts are in [bench/](../bench).
