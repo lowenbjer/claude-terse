@@ -2,17 +2,17 @@
 
 A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 54% fewer words, 32% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
 
-Terms used in the numbers below:
+The tables use these terms.
 
-- **Vanilla**: Claude Code with no CLAUDE.md, no plugins and no custom instructions.
-- **Style violation**: a sentence that breaks one of the rules. An Opus 5 judge counts them by reading each reply against the rule list. Counts are per 1,000 words, so long and short replies compare.
-- **Metaphor**: figurative wording where a literal phrase exists. "A 3,000-line merge gets a skim and a prayer" instead of "a 3,000-line merge gets a 10-minute read and no line-by-line review".
-- **"X, not Y" reframe**: a contrast used as a label instead of an explanation. "This is intent, not behavior" instead of "the docstring says X, the code does Y".
-- **Slogan**: a short line that sounds like a principle and states no mechanism. "The decision is the feature."
-- **Cadence**: rhythm built for effect, such as triads and punchline endings.
-- **Bloat**: sentences that add no fact, including narration like "I'll look at the code now".
-- **First person**: "I", "me", "my", "let me" and their contractions. Sentences whose subject is the writer.
-- **Output tokens**: what the model wrote, thinking included. Output tokens are priced about five times higher than input tokens on Opus and Fable.
+- Vanilla is Claude Code with no CLAUDE.md, no plugins and no custom instructions.
+- A style violation is a sentence that breaks one of the rules. An Opus 5 judge counts them by reading each reply against the rule list. Counts are per 1,000 words, so long and short replies compare.
+- Metaphor is figurative wording where a literal phrase exists. "A 3,000-line merge gets a skim and a prayer" in place of "a 3,000-line merge gets a 10-minute read and no line-by-line review".
+- An "X, not Y" reframe is a contrast used as a label in place of an explanation. "This is intent, not behavior" in place of "the docstring says X, the code does Y".
+- A slogan is a short line that sounds like a principle and states no mechanism. "The decision is the feature."
+- Cadence is rhythm built for effect, such as triads and punchline endings.
+- Bloat is a sentence that adds no fact, including narration like "I'll look at the code now".
+- First person is "I", "me", "my", "let me" and their contractions. Sentences whose subject is the writer.
+- Output tokens are what the model wrote, thinking included. Output tokens are priced about five times higher than input tokens on Opus and Fable.
 
 Measured on 12 public prompts, vanilla Claude Code against terse 1.1.0. Opus 5.5, effort high, one run each.
 
@@ -42,13 +42,13 @@ For the context meter, run `/terse:install-meter` once. It adds one `statusLine`
 
 ## What you get
 
-**The rules.** 20 rules and 12 before/after pairs, 596 words. First sentence is the answer you are looking for. One idea per sentence. Every sentence has the topic as its subject: no "I", no account of what was checked or would be done. No em dashes, no slogans, no "X, not Y" framing, no self-labeling, no closing offers. Chat replies capped at 150 words unless you ask for a document or a walkthrough. A redo sends only the delta. Full text: [rules/RULES.md](rules/RULES.md).
+The rules are a reply shape, 22 rules and 18 before/after pairs, 877 words. The shape: one sentence with the answer, then a list or a table, then at most one caveat sentence, then stop. Every sentence has the topic as its subject: no "I", no account of what was checked or would be done. Bullets start with the fact, so no bold lead-ins and no label lines. Plain words in place of coined names. No em dashes, no slogans, no "X, not Y" framing, no self-labeling, no closing offers. Chat replies stop at 150 words unless you ask for a document or a walkthrough. A findings list gets one or two sentences per finding. A redo sends only the delta. Where a rule has a positive form, the text states the form ("The last sentence is a fact.") ahead of the ban. Full text: [rules/RULES.md](rules/RULES.md).
 
-**Delivery.** The rules ship as an output style. It applies while the plugin is enabled and is part of the main agent's system prompt. Subagents run their own system prompt, so a `SubagentStart` hook hands them the same text. No hook rewrites or blocks anything.
+The rules ship as an output style. It applies while the plugin is enabled and is part of the main agent's system prompt. Subagents run their own system prompt, so a `SubagentStart` hook hands them the same text. No hook rewrites or blocks anything.
 
-**The reminder.** The output style is the first part of the context. After 20 or 30 turns it is 100k tokens before the current prompt, and the model's own recent replies become its nearest style examples. From there the replies show the answer in the last line, "I checked" sentences, dashes, "X, not Y" and slogans. A `UserPromptSubmit` hook adds the whole rule set, condensed to 280 characters, to every prompt next to your text. Cost per turn is about 70 input tokens. The text is [rules/REMINDER.md](rules/REMINDER.md).
+The reminder exists because the output style is the first part of the context. After 20 or 30 turns it is 100k tokens before the current prompt. The model's own recent replies become its nearest style examples. From there the replies show the answer in the last line, "I checked" sentences, dashes, "X, not Y" and slogans. A `UserPromptSubmit` hook adds the whole rule set, condensed to 534 characters, to every prompt next to your text. Cost per turn is about 135 input tokens. The text is [rules/REMINDER.md](rules/REMINDER.md).
 
-**The meter.** Model name and context fill as a percentage. Green below 37%, yellow from 37%, orange from 49%, skull from 60%. The thresholds are set below the usual 50, 65 and 80 percent. Three studies show retrieval quality dropping well before a large window fills:
+The meter shows model name and context fill as a percentage. Green below 37%, yellow from 37%, orange from 49%, skull from 60%. The thresholds are set below the usual 50, 65 and 80 percent. Three studies show retrieval quality dropping well before a large window fills:
 
 - Chroma's [Context Rot](https://www.trychroma.com/research/context-rot) report: 18 models, degradation from 50k tokens on a 200k window.
 - [NoLiMa](https://arxiv.org/abs/2502.05167): 11 of 13 models at half their baseline by 32k tokens.
@@ -58,7 +58,7 @@ The thresholds are the three numbers near the top of [statusline/context-meter.j
 
 ## Before and after
 
-Prompt, run once with each setup on Opus 5.5: "We have a Flask API with a Postgres database. Requests time out under load once a day around 09:00. Where would you look first and why?"
+Prompt, run on Opus 5.5 with each setup: "We have a Flask API with a Postgres database. Requests time out under load once a day around 09:00. Where would you look first and why?"
 
 **Vanilla, 636 words:**
 
@@ -125,25 +125,29 @@ Prompt, run once with each setup on Opus 5.5: "We have a Flask API with a Postgr
 >
 > If you share the scheduler config, the SQLAlchemy engine settings and the gunicorn command, I can check the connection arithmetic for you.
 
-**terse, 181 words:**
+**terse 1.2.0, 180 words:**
 
-> Start with whatever else is scheduled for 09:00. A timeout at the same time every day probably has a scheduled trigger behind it. Organic traffic growth does not hit one fixed minute.
+> Start with what runs at 09:00, since a fixed daily time points to a scheduled job or a login surge, not random load.
 >
-> 1. **Cron and batch jobs.** Check crontab, Celery beat, `pg_cron` and CI schedules for 09:00 entries. Report builds, ETL loads and `pg_dump` backups can hold locks or saturate disk I/O.
-> 2. **`pg_stat_activity` from 08:55 to 09:15.** Sample it every 10 seconds. Rows with `wait_event_type = 'Lock'` or `state = 'idle in transaction'` point to the blocking session.
-> 3. **Connection pool size.** SQLAlchemy defaults to `pool_size=5` and `max_overflow=10` per process. Multiply by Gunicorn workers and compare the total with Postgres `max_connections`. An exhausted pool makes requests queue until they time out.
-> 4. **`pg_stat_statements`.** Compare mean query time inside that window with the rest of the day. A slow query that only shows up then usually comes from a job or from stale statistics.
-> 5. **Cache expiry.** A Redis TTL of 24 hours set at 09:00 makes every cached key expire together. All of those requests then hit Postgres at once.
+> - Check pg_stat_activity from 08:55 to 09:15. Long queries, "idle in transaction" sessions, or lock waits show which side blocks.
+> - List cron jobs, Celery beat tasks, pg_cron entries and backups scheduled near 09:00. A report, ETL or pg_dump can hold locks or saturate disk I/O.
+> - Compare Gunicorn workers times threads with SQLAlchemy pool_size plus max_overflow. Requests beyond that queue for pool_timeout (30 s default), which looks like a timeout.
+> - Compare Postgres max_connections with the total across all app instances. Exhausting it rejects new connections outright.
+> - Turn on log_min_duration_statement (for example 500 ms) and log_lock_waits. The next 09:00 run then records the slow statements and their blockers.
+> - Check autovacuum and ANALYZE timing on the busiest tables. Stale statistics after a nightly bulk load can switch plans to sequential scans.
+>
+> The two logging settings are cheap to turn on today, and they separate a database-side cause from an app-side pool limit after one morning.
 
-Both replies name scheduled jobs, pool exhaustion and cache expiry. The vanilla one adds four headers, a recommendation section that repeats steps 1 to 3, and an offer to check the config. The terse one gives the pool defaults, the sampling interval and the two views to query, with no sentence about the writer.
+Both replies name scheduled jobs, lock waits and pool exhaustion. The vanilla one adds six headers, a recommendation section that repeats steps 1 to 3, and an offer to check the config. The terse one gives the pool arithmetic, the sampling window and the two log settings, with no sentence about the writer. The 1.2.0 text ran this prompt four times: 148, 176, 180 and 189 words. Two of the four opened bullets with bold lead-ins against rule 21. The 180-word run is shown.
 
 ## Measured limits
 
-- **Measured with Opus 5.5 and Fable 5.1 as the main agent.** Opus 5 and Sonnet 5 ran only as subagents. With the rules in context, Opus 5 kept 13 em dashes per 1k words and Sonnet put a dash in 1 reply of 5. No numbers exist for either as the main model. Per-model tables: [docs/models](docs/models/README.md).
-- **Metaphor drops to 0 on the public set and by half on the private set.** Opus 5.5 with the 1.1.0 text: 3.69 to 0.0 per 1k on 12 public prompts, 3.09 to 1.57 on 20 private prompts. Fable 5.1 with the 1.0.0 text: 7.2 to 3.3 on the public set.
-- **The 150-word cap shortens replies without enforcing the limit.** Chat words fell 46 to 70 percent across two prompt sets and two models. Long analysis questions still run over.
-- **Subagent output changed with the subagent model and did not change with the rules.** In a Fable 5.1 session, Explore-type subagents ran Opus 5 and kept 13 em dashes per 1k words with the rules in their context. Fable subagents produced 0.1 per 1k without any rules. In an Opus 5.5 session, the subagents ran Opus 5.5 and wrote 0.4 per 1k without the rules and 0 with them. To control it, set `CLAUDE_CODE_SUBAGENT_MODEL` to your main model, or ask for general-purpose subagents, which inherit it.
-- **Cost.** Output tokens fell 42 to 55 percent. Context tokens are most of the cost per call. Total cost fell 2 percent on the short public set with the 1.1.0 text and 9 to 12 percent with the 1.0.0 text: the reminder adds about 70 uncached tokens per turn, and the model thought for 4,155 tokens over 12 runs against 2,150 without it. On 20 chat prompts against a real codebase with a large CLAUDE.md, cost fell 51 percent on Fable 5.1 with the 1.0.0 text and 32 percent on Opus 5.5 with the 1.1.0 text.
+- Opus 5.5 and Fable 5.1 are the measured main agents. Opus 5 and Sonnet 5 ran only as subagents. With the rules in context, Opus 5 kept 13 em dashes per 1k words and Sonnet put a dash in 1 reply of 5. No numbers exist for either as the main model. Per-model tables: [docs/models](docs/models/README.md).
+- Metaphor drops to 0 on the public set and by half on the private set. Opus 5.5 with the 1.1.0 text: 3.69 to 0.0 per 1k on 12 public prompts, 3.09 to 1.57 on 20 private prompts. Fable 5.1 with the 1.0.0 text: 7.2 to 3.3 on the public set.
+- The 150-word cap shortens replies without enforcing the limit. Chat words fell 46 to 70 percent across two prompt sets and two models. Long analysis questions still run over.
+- Subagent output followed the subagent model. In a Fable 5.1 session, Explore-type subagents ran Opus 5 and kept 13 em dashes per 1k words with the rules in their context. Fable subagents produced 0.1 per 1k without any rules. In an Opus 5.5 session, the subagents ran Opus 5.5 and wrote 0.4 per 1k without the rules and 0 with them. To pick the subagent model, set `CLAUDE_CODE_SUBAGENT_MODEL` to your main model, or ask for general-purpose subagents, which inherit it.
+- The reply shape and rule 21 removed the two forms they name and no others. The check was a 10-turn conversation with the same prompts on both models. Bold lead-ins went from 20 to 0 on Fable 5.1 and from 36 to 0 on Opus 5.5. Label lines went from 10 to 4 and from 8 to 0. Judge-counted metaphor, cadence and bloat stayed level. Reply length stayed level. Table in [docs/benchmark.md](docs/benchmark.md#multi-turn-check). The 1.2.0 text has no public-set rerun. The tables above are the 1.1.0 text.
+- Cost fell less than words. Output tokens fell 42 to 55 percent. Context tokens are most of the cost per call. Total cost fell 2 percent on the short public set with the 1.1.0 text and 9 to 12 percent with the 1.0.0 text. The reminder adds about 100 uncached tokens per turn. Thinking rose from 2,150 tokens over 12 runs with the 1.0.0 text to 4,155 with 1.1.0. On 20 chat prompts against a real codebase with a large CLAUDE.md, cost fell 51 percent on Fable 5.1 with the 1.0.0 text. On Opus 5.5 with the 1.1.0 text it fell 32 percent.
 
 ## Uninstall
 

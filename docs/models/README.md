@@ -9,8 +9,8 @@ One file per model tested as the main agent. Each file reports the public set: 1
 | [Opus 5.5](opus-5-5.md), terse 1.0.0 | medium | 5,524 | 1,911 | -65% | 10.1 | 2.6 | -74% | -9% | 2026-09-23 |
 | [Fable 5.1](fable-5-1.md), terse 1.0.0 | high | 4,610 | 2,125 | -54% | 18.4 | 7.1 | -61% | -9% | 2026-09-22 |
 
-Version 1.0.0 had 18 rules. Version 1.1.0 added rule 19 (the topic is the subject, no first person), rule 20 (a redo sends the delta) and the per-turn reminder.
+Version 1.0.0 had 18 rules. Version 1.1.0 added rule 19 (the topic is the subject, no first person), rule 20 (a redo sends the delta) and the per-turn reminder. Version 1.2.0 added the reply shape, rule 21 (bullets start with the fact) and rule 22 (plain words). It restated rules in instruction form. It has no public-set run. The multi-turn check is in [docs/benchmark.md](../benchmark.md#multi-turn-check).
 
-Cost on this set moves less than words because the 12 runs read about 230,000 cached context tokens and write 8,000 to 19,000 output tokens. The 40-prompt private set in [docs/benchmark.md](../benchmark.md) measures longer sessions against a real codebase: on 20 chat prompts, cost fell 51% on Fable 5.1 with the 1.0.0 text and 32% on Opus 5.5 with the 1.1.0 text.
+Cost on this set moves less than words because the 12 runs read about 230,000 cached context tokens and write 8,000 to 19,000 output tokens. The 40-prompt private set in [docs/benchmark.md](../benchmark.md) measures longer sessions against a real codebase. On 20 chat prompts, cost fell 51% on Fable 5.1 with the 1.0.0 text and 32% on Opus 5.5 with the 1.1.0 text.
 
 Subagents: the rules reach subagents through the SubagentStart hook. Subagent output is in the private set, with Opus 5 subagents in the Fable 5.1 session and Opus 5.5 subagents in the Opus 5.5 session, see [docs/benchmark.md](../benchmark.md).
