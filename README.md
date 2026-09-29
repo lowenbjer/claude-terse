@@ -1,6 +1,6 @@
 # terse
 
-A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 54% fewer words, 32% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
+A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 54% fewer words, 32% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A Stop hook sends a reply that breaks a checkable rule back for one rewrite. A context meter for the status line comes with it.
 
 Terms used in the numbers below:
 
@@ -42,11 +42,13 @@ For the context meter, run `/terse:install-meter` once. It adds one `statusLine`
 
 ## What you get
 
-**The rules.** 20 rules and 12 before/after pairs, 596 words. First sentence is the answer you are looking for. One idea per sentence. Every sentence has the topic as its subject: no "I", no account of what was checked or would be done. No em dashes, no slogans, no "X, not Y" framing, no self-labeling, no closing offers. Chat replies capped at 150 words unless you ask for a document or a walkthrough. A redo sends only the delta. Full text: [rules/RULES.md](rules/RULES.md).
+**The rules.** 20 rules and 15 before/after pairs, 684 words. First sentence is the answer you are looking for. One idea per sentence. Every sentence has the topic as its subject: no "I", no account of what was checked or would be done. No em dashes, no slogans, no "X, not Y" framing, no self-labeling, no closing offers. Chat replies capped at 150 words unless you ask for a document or a walkthrough. A findings list gives each finding one or two sentences under a 300-word cap. The agent's own next step is an instruction, "Next: run the suite", with no "I". A redo sends only the delta. Full text: [rules/RULES.md](rules/RULES.md).
 
 **Delivery.** The rules ship as an output style. It applies while the plugin is enabled and is part of the main agent's system prompt. Subagents run their own system prompt, so a `SubagentStart` hook hands them the same text. No hook rewrites or blocks anything.
 
-**The reminder.** The output style is the first part of the context. After 20 or 30 turns it is 100k tokens before the current prompt, and the model's own recent replies become its nearest style examples. From there the replies show the answer in the last line, "I checked" sentences, dashes, "X, not Y" and slogans. A `UserPromptSubmit` hook adds the whole rule set, condensed to 280 characters, to every prompt next to your text. Cost per turn is about 70 input tokens. The text is [rules/REMINDER.md](rules/REMINDER.md).
+**The reminder.** The output style is the first part of the context. After 20 or 30 turns it is 100k tokens before the current prompt, and the model's own recent replies become its nearest style examples. From there the replies show the answer in the last line, "I checked" sentences, dashes, "X, not Y" and slogans. A `UserPromptSubmit` hook adds the whole rule set, condensed to 308 characters, to every prompt next to your text. Cost per turn is about 75 input tokens. The text is [rules/REMINDER.md](rules/REMINDER.md).
+
+**The gate.** The reminder alone does not hold in long sessions. Over five days of daily use on Fable 5.1, 290 replies, 43% broke a rule a script can check, 123 of them with first person, while the reminder fired on every turn. A `Stop` hook now reads each finished reply and counts em and en dashes, first-person words outside quotes and code, closing offers and the banned words. On a hit it names the violations and asks for one rewrite. The turn ends on the rewrite. The first draft stays visible above it in the terminal, and the rewrite costs one more model call on that turn. The hook never blocks twice in a turn. `TERSE_GATE=off` in the environment disables it. Code: [hooks/check-reply.js](hooks/check-reply.js), 9 test cases in [hooks/check-reply.test.js](hooks/check-reply.test.js).
 
 **The meter.** Model name and context fill as a percentage. Green below 37%, yellow from 37%, orange from 49%, skull from 60%. The thresholds are set below the usual 50, 65 and 80 percent. Three studies show retrieval quality dropping well before a large window fills:
 
@@ -143,6 +145,7 @@ Both replies name scheduled jobs, pool exhaustion and cache expiry. The vanilla 
 - **Metaphor drops to 0 on the public set and by half on the private set.** Opus 5.5 with the 1.1.0 text: 3.69 to 0.0 per 1k on 12 public prompts, 3.09 to 1.57 on 20 private prompts. Fable 5.1 with the 1.0.0 text: 7.2 to 3.3 on the public set.
 - **The 150-word cap shortens replies without enforcing the limit.** Chat words fell 46 to 70 percent across two prompt sets and two models. Long analysis questions still run over.
 - **Subagent output changed with the subagent model and did not change with the rules.** In a Fable 5.1 session, Explore-type subagents ran Opus 5 and kept 13 em dashes per 1k words with the rules in their context. Fable subagents produced 0.1 per 1k without any rules. In an Opus 5.5 session, the subagents ran Opus 5.5 and wrote 0.4 per 1k without the rules and 0 with them. To control it, set `CLAUDE_CODE_SUBAGENT_MODEL` to your main model, or ask for general-purpose subagents, which inherit it.
+- **First person in daily use.** Nine prompts that ask the agent for its next step, a permission ask, a hand-off or an opinion, run once each in a fresh session: 0 first-person words with the 1.1.0 text and 0 with the 1.2.0 text. The same model in daily use, 290 replies over five days, put first person in 50% of replies.
 - **Cost.** Output tokens fell 42 to 55 percent. Context tokens are most of the cost per call. Total cost fell 2 percent on the short public set with the 1.1.0 text and 9 to 12 percent with the 1.0.0 text: the reminder adds about 70 uncached tokens per turn, and the model thought for 4,155 tokens over 12 runs against 2,150 without it. On 20 chat prompts against a real codebase with a large CLAUDE.md, cost fell 51 percent on Fable 5.1 with the 1.0.0 text and 32 percent on Opus 5.5 with the 1.1.0 text.
 
 ## Uninstall
