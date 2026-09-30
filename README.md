@@ -2,6 +2,8 @@
 
 A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 54% fewer words, 32% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
 
+![Same prompt on Opus 5.5: vanilla Claude Code at 636 words against terse at 180 words](docs/img/before-after.gif)
+
 The tables use these terms.
 
 - Vanilla is Claude Code with no CLAUDE.md, no plugins and no custom instructions.
@@ -148,6 +150,10 @@ Both replies name scheduled jobs, lock waits and pool exhaustion. The vanilla on
 - Subagent output followed the subagent model. In a Fable 5.1 session, Explore-type subagents ran Opus 5 and kept 13 em dashes per 1k words with the rules in their context. Fable subagents produced 0.1 per 1k without any rules. In an Opus 5.5 session, the subagents ran Opus 5.5 and wrote 0.4 per 1k without the rules and 0 with them. To pick the subagent model, set `CLAUDE_CODE_SUBAGENT_MODEL` to your main model, or ask for general-purpose subagents, which inherit it.
 - The reply shape and rule 21 removed the two forms they name and no others. The check was a 10-turn conversation with the same prompts on both models. Bold lead-ins went from 20 to 0 on Fable 5.1 and from 36 to 0 on Opus 5.5. Label lines went from 10 to 4 and from 8 to 0. Judge-counted metaphor, cadence and bloat stayed level. Reply length stayed level. Table in [docs/benchmark.md](docs/benchmark.md#multi-turn-check). The 1.2.0 text has no public-set rerun. The tables above are the 1.1.0 text.
 - Cost fell less than words. Output tokens fell 42 to 55 percent. Context tokens are most of the cost per call. Total cost fell 2 percent on the short public set with the 1.1.0 text and 9 to 12 percent with the 1.0.0 text. The reminder adds about 100 uncached tokens per turn. Thinking rose from 2,150 tokens over 12 runs with the 1.0.0 text to 4,155 with 1.1.0. On 20 chat prompts against a real codebase with a large CLAUDE.md, cost fell 51 percent on Fable 5.1 with the 1.0.0 text. On Opus 5.5 with the 1.1.0 text it fell 32 percent.
+
+## Add your model
+
+The catalog in [docs/models](docs/models/README.md) has one file per model. A row costs about $1 and one pull request: run the 12 public prompts with and without the plugin through `bench/run.py`, paste the two summaries, write 2 to 5 findings. Steps in [docs/models/CONTRIBUTING.md](docs/models/CONTRIBUTING.md). A reply that broke the rules goes in an issue with the "Post your worst reply" template.
 
 ## Uninstall
 
