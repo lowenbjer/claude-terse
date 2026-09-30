@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <path d="M48 0H208A48 48 0 0 1 256 48V208A48 48 0 0 1 208 256H48A48 48 0 0 1 0 208V48A48 48 0 0 1 48 0Z" fill="#181c24" stroke="#2c3240" stroke-width="4"/>
+  <circle cx="64" cy="64" r="6" fill="#525968"/>
+  <circle cx="96" cy="64" r="6" fill="#525968"/>
+  <circle cx="128" cy="64" r="6" fill="#525968"/>
+  <circle cx="160" cy="64" r="6" fill="#525968"/>
+  <circle cx="192" cy="64" r="6" fill="#525968"/>
+  <circle cx="64" cy="88" r="6" fill="#667080"/>
+  <circle cx="96" cy="88" r="6" fill="#667080"/>
+  <circle cx="128" cy="88" r="6" fill="#667080"/>
+  <circle cx="160" cy="88" r="6" fill="#667080"/>
+  <circle cx="192" cy="88" r="6" fill="#667080"/>
+  <circle cx="64" cy="112" r="6" fill="#667080"/>
+  <circle cx="96" cy="112" r="6" fill="#667080"/>
+  <circle cx="128" cy="112" r="6" fill="#667080"/>
+  <circle cx="160" cy="112" r="6" fill="#667080"/>
+  <circle cx="192" cy="112" r="6" fill="#667080"/>
+  <circle cx="128" cy="180" r="16" fill="#62c88c"/>
+</svg>
