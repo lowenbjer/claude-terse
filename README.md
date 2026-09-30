@@ -40,7 +40,7 @@ Tables for Fable 5.1, for Opus 5.5 at effort medium, and for the 1.0.0 rule text
 
 The writing rules apply to every new session, after `/clear`, and to an existing session you exit and resume with `claude --resume`.
 
-For the context meter, run `/terse:install-meter` once. It adds one `statusLine` entry to your `~/.claude/settings.json` and takes effect on save.
+For the context meter, run `/terse:install-meter` once. It copies the 26-line meter script to the plugin's data directory, which plugin updates leave in place, and adds one `statusLine` entry to your `~/.claude/settings.json`. The entry takes effect on save.
 
 ## What you get
 
@@ -48,7 +48,7 @@ The rules are a reply shape, 22 rules and 18 before/after pairs, 877 words. The 
 
 The rules ship as an output style. It applies while the plugin is enabled and is part of the main agent's system prompt. Subagents run their own system prompt, so a `SubagentStart` hook hands them the same text. No hook rewrites or blocks anything.
 
-The reminder exists because the output style is the first part of the context. After 20 or 30 turns it is 100k tokens before the current prompt. The model's own recent replies become its nearest style examples. From there the replies show the answer in the last line, "I checked" sentences, dashes, "X, not Y" and slogans. A `UserPromptSubmit` hook adds the whole rule set, condensed to 534 characters, to every prompt next to your text. Cost per turn is about 135 input tokens. The text is [rules/REMINDER.md](rules/REMINDER.md).
+The reminder exists because the output style is the first part of the context. After 20 or 30 turns it is 100k tokens before the current prompt. The model's own recent replies become its nearest style examples. From there the replies show the answer in the last line, "I checked" sentences, dashes, "X, not Y" and slogans. A `UserPromptSubmit` hook adds the whole rule set, condensed to 576 characters, to every prompt next to your text. Cost per turn is about 145 input tokens. The text is [rules/REMINDER.md](rules/REMINDER.md).
 
 The meter shows model name and context fill as a percentage. Green below 37%, yellow from 37%, orange from 49%, skull from 60%. The thresholds are set below the usual 50, 65 and 80 percent. Three studies show retrieval quality dropping well before a large window fills:
 
@@ -161,7 +161,7 @@ The catalog in [docs/models](docs/models/README.md) has one file per model. A ro
 /plugin uninstall terse@terse
 ```
 
-Remove the `statusLine` entry from `~/.claude/settings.json` if you installed the meter.
+Remove the `statusLine` entry from `~/.claude/settings.json` if you installed the meter. The uninstall deletes the plugin's data directory, where the meter copy lives.
 
 ## License
 
