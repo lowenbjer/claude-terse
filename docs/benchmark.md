@@ -1,6 +1,6 @@
 # Benchmark
 
-Two prompt sets ran through the same runner, scorer and judge. Each prompt ran once through `claude -p` with `--output-format stream-json`, September 2026.
+Two prompt sets ran through the same runner, scorer and judge. Each prompt ran once through `claude -p`, September 2026. The public set reruns with [bench/run.py](../bench/run.py), one command per setup, see [docs/models/CONTRIBUTING.md](models/CONTRIBUTING.md).
 
 ## Public set
 

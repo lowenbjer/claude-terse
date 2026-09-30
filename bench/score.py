@@ -4,7 +4,7 @@ Usage: python3 score.py < reply.txt   (prints JSON)
        or import score_text(text) -> dict
 
 Counts the checkable items from rules/RULES.md: dashes, first person, banned
-phrases, closers, "X, not Y", sentence length.
+phrases, closers, "X, not Y", sentence length, bold lead-ins, label lines.
 The judge in judge.py covers metaphor and cadence.
 """
 import json
@@ -66,6 +66,35 @@ def x_not_y(text):
     return hits
 
 
+def bullet_body(line):
+    """The text of a list line after its marker: "- ", "* " or "12. "."""
+    s = line.strip()
+    for marker in ("- ", "* "):
+        if s.startswith(marker):
+            return s[len(marker):]
+    digits = 0
+    while digits < len(s) and s[digits].isdigit():
+        digits += 1
+    if digits and s[digits:digits + 2] == ". ":
+        return s[digits + 2:]
+    return s
+
+
+def bold_lead_ins(text):
+    """Rule 21: list lines or paragraphs that open with a bold phrase."""
+    return sum(1 for l in text.splitlines() if bullet_body(l).startswith("**"))
+
+
+def label_lines(text):
+    """Rule 21: a line of 8 words or fewer ending in a colon."""
+    count = 0
+    for l in text.splitlines():
+        s = l.strip()
+        if s.endswith(":") and len(s.split()) <= 8 and not s.startswith(("|", "#", "-", "*", ">")):
+            count += 1
+    return count
+
+
 def score_text(text):
     words = text.split()
     nwords = len(words)
@@ -88,6 +117,8 @@ def score_text(text):
         "x_not_y_examples": xny[:3],
         "long_sentences": len(long_sents),
         "headers": sum(1 for l in text.splitlines() if l.startswith("#")),
+        "bold_lead_ins": bold_lead_ins(text),
+        "label_lines": label_lines(text),
         "first_sentence_words": len(first.split()),
         "first_sentence_is_question_or_meta": first.lower().startswith(("let me", "i'll", "i will", "great", "sure", "good question")),
     }
