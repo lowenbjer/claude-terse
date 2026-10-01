@@ -161,6 +161,10 @@ Both replies name scheduled jobs, lock waits and pool exhaustion. The vanilla on
 
 The catalog in [docs/models](docs/models/README.md) has one file per model. A row costs about $1 and one pull request: run the 12 public prompts with and without the plugin through `bench/run.py`, paste the two summaries, write 2 to 5 findings. Steps in [docs/models/CONTRIBUTING.md](docs/models/CONTRIBUTING.md). A reply that broke the rules goes in an issue with the "Post your worst reply" template.
 
+## Data
+
+The plugin makes no network calls and collects nothing. Its hooks read a text file inside the plugin directory and hand it to Claude Code. The install skill writes one key to your settings file. Details in [docs/privacy.md](docs/privacy.md).
+
 ## Uninstall
 
 ```
