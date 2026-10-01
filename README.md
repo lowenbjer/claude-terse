@@ -39,12 +39,16 @@ Tables for Fable 5.1, for Opus 5.5 at effort medium, and for the 1.0.0 rule text
 
 ## Install
 
+From the Claude directory: open [the terse listing](https://claude.ai/customize/plugins/id/aa4422b4-a8c3-42e2-8f4f-d505301cb4bd@anthropic-plugin-directory) and select **Add to Claude Code**. The plugin is saved to your claude.ai account and downloads the next time you start Claude Code signed in to that account. In a running session, `/reload-plugins` loads it at once. Anthropic scans and reviews each version before the directory serves it.
+
+From GitHub, in Claude Code:
+
 ```
 /plugin marketplace add lowenbjer/claude-terse
 /plugin install terse@terse
 ```
 
-The writing rules apply to every new session, after `/clear`, and to an existing session you exit and resume with `claude --resume`.
+Both routes install the same files. The writing rules apply to every new session, after `/clear`, and to an existing session you exit and resume with `claude --resume`.
 
 For the context meter, run `/terse:install-meter` once. It copies the 26-line meter script to the plugin's data directory, which plugin updates leave in place, and adds one `statusLine` entry to your `~/.claude/settings.json`. The entry takes effect on save.
 
@@ -166,6 +170,10 @@ The catalog in [docs/models](docs/models/README.md) has one file per model. A ro
 The plugin makes no network calls and collects nothing. Its hooks read a text file inside the plugin directory and hand it to Claude Code. The install skill writes one key to your settings file. Details in [docs/privacy.md](docs/privacy.md).
 
 ## Uninstall
+
+Installed from the directory: open the plugin under **Customize > Plugins** on claude.ai and select **Remove** from its menu.
+
+Installed from GitHub:
 
 ```
 /plugin uninstall terse@terse
