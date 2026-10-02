@@ -18,6 +18,7 @@
   "homepage": "https://github.com/lowenbjer/claude-terse",
   "repository": "https://github.com/lowenbjer/claude-terse",
   "displayName": "terse",
+  "icon": "./.claude-plugin/icon.png",
   "documentationUrl": "https://github.com/lowenbjer/claude-terse#readme",
   "supportUrl": "https://github.com/lowenbjer/claude-terse/issues",
   "privacyPolicyUrl": "https://github.com/lowenbjer/claude-terse/blob/main/docs/privacy.md"
