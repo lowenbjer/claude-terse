@@ -10,7 +10,7 @@
     {
       "name": "terse",
       "source": "./",
-      "description": "Cuts Claude Code reply length in half and removes mannered prose. 22 writing rules as a forced output style, a per-turn reminder against drift in long sessions, the same rules for subagents, and a context meter for the status line. Measured on 20 prompts against a real codebase: Fable 5.1 46% fewer words and 51% lower cost, Opus 5.5 54% fewer words and 32% lower cost. Rules, method and numbers: github.com/lowenbjer/claude-terse",
+      "description": "Cuts Claude Code reply length in half and removes mannered prose. 22 writing rules as a forced output style, a per-turn reminder against drift in long sessions, the same rules for subagents, and a context meter for the status line. Measured on 20 prompts against a real codebase: about half the words at 30% to 50% lower cost. Rules, method and numbers per model: github.com/lowenbjer/claude-terse",
       "version": "1.2.2",
       "author": {
         "name": "Karl Lowenbjer",
