@@ -6,9 +6,19 @@
 
 </div>
 
-A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 54% fewer words, 32% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
+I struggle with the way Claude talks to me. Every question comes back as an essay. Slogans, metaphors, a recap of what it just did, "it's not X, it's Y", and a "happy to dig further" at the end. Every. Single. Time.
+
+Claude's own concise mode shortens it a bit and keeps the rest of the slop.
+
+I tried system prompts. Forgotten after a couple of turns. I tried plugins. Some were slash commands, some solved for token use, some for neurodivergence. None of them made Claude speak normally.
+
+I just wanted the answer. First sentence, plain words, then stop.
+
+So I spent a few weeks writing down every construct that annoyed me and what it should have said instead, and made Claude follow that. It worked for me. If Claude speaks to you the same way, it is yours.
 
 ![Same prompt on Opus 5.5: vanilla Claude Code at 636 words against terse at 180 words](docs/img/before-after.gif)
+
+A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 54% fewer words, 32% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
 
 The tables use these terms.
 
