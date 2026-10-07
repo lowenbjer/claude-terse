@@ -6,15 +6,15 @@
 
 </div>
 
-I struggle with the way Claude talks to me. Every question comes back as an essay. Slogans, metaphors, a recap of what it just did, "it's not X, it's Y", and a "happy to dig further" at the end. Every. Single. Time.
+I struggle with the way Claude Code speaks to me. Every single question comes back as an essay. Slogans, metaphors, a recap of what it just did, "it's not X, it's Y". Every. Single. Time.
 
-Claude's own concise mode shortens it a bit and keeps the rest of the slop.
+Claude's own "concise" mode shortens it, somewhat, but keeps the the rest of the slop.
 
-I tried system prompts. Forgotten after a couple of turns. I tried plugins. Some were slash commands, some solved for token use, some for neurodivergence. None of them made Claude speak normally.
+I tried system prompts, those got forgotten after a couple of turns. I tried looking for plugins but none consistently made Claude speak normally. Some where slash commands, other solved for token use, others solved for neurodivergence. None of them made Claude speak normally.
 
-I just wanted the answer. First sentence, plain words, then stop.
+I just wanted to not read an essay and make Claude get to the point fast, every single time.
 
-So I spent a few weeks writing down every construct that annoyed me and what it should have said instead, and made Claude follow that. It worked for me. If Claude speaks to you the same way, it is yours.
+So I spent a few weeks nothing down every thing it did that annoyed me and what i want it say instead, and built a Plugin around that. It worked for me. If Claude speaks to you the same way, it is yours.
 
 ![Same prompt on Opus 5.5: vanilla Claude Code at 636 words against terse at 180 words](docs/img/before-after.gif)
 
