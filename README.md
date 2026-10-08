@@ -1,4 +1,4 @@
-# terse
+# terse - makes Claude speak normally
 
 <div align="center">
 
