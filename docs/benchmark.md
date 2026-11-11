@@ -1,12 +1,27 @@
 # Benchmark
 
-Two prompt sets ran through the same runner, scorer and judge. Each prompt ran once through `claude -p`, September 2026. The public set reruns with [bench/run.py](../bench/run.py), one command per setup, see [docs/models/CONTRIBUTING.md](models/CONTRIBUTING.md).
+Two prompt sets ran through the same runner, scorer and judge. Each prompt ran once through `claude -p`, in September 2026 and again on 2026-11-11 for the public set. The public set reruns with [bench/run.py](../bench/run.py), one command per setup, see [docs/models/CONTRIBUTING.md](models/CONTRIBUTING.md).
 
 ## Public set
 
-12 prompts in [bench/showcase_prompts.json](../bench/showcase_prompts.json): 10 engineering questions, 2 short documents. `{OUT}` in the two document prompts is the output directory the runner substituted. Run in an empty directory with no CLAUDE.md and no other plugins.
+12 prompts in [bench/showcase_prompts.json](../bench/showcase_prompts.json): 10 engineering questions, 2 short documents. `{OUT}` in the two document prompts is the directory the runner substituted. Run in an empty directory with no CLAUDE.md and no other plugins.
 
-Results per model are in [docs/models](models/README.md): [Opus 5.5](models/opus-5-5.md) at effort high and medium, [Fable 5.1](models/fable-5-1.md) at effort high.
+Results per model are in [docs/models](models/README.md): [Fable 5.2](models/fable-5-2.md) at effort high and medium, [Opus 5.5](models/opus-5-5.md) at effort high and medium, [Fable 5.1](models/fable-5-1.md) at effort high.
+
+All three models ran the set on 2026-11-11 with the 1.2.2 text, with no setting sources and three judge passes per chat reply.
+
+| | Fable 5.2 | Fable 5.1 | Opus 5.5 |
+|---|---|---|---|
+| Chat words, vanilla to terse | 3,762 to 1,649 (-56%) | 3,770 to 1,772 (-53%) | 5,424 to 1,989 (-63%) |
+| Judge violations per 1k | 12.0 to 2.6 (-78%) | 17.6 to 6.8 (-61%) | 12.3 to 1.8 (-85%) |
+| Metaphor per 1k | 5.85 to 0.61 | 6.63 to 3.76 | 3.75 to 0.0 |
+| First person per 1k | 2.66 to 0.0 | 1.59 to 0.0 | 1.84 to 0.0 |
+| Bold lead-ins | 73 to 0 | 71 to 0 | 104 to 19 |
+| Label lines | 9 to 2 | 7 to 8 | 14 to 8 |
+| Thinking tokens, 12 runs | 1,338 to 8,292 | 278 to 0 | 2,232 to 4,841 |
+| List-price cost, 12 runs | $2.15 to $2.60 (+21%) | $2.67 to $2.94 (+10%) | $1.09 to $1.17 (+7%) |
+
+Cost rises on single prompts because the plugin adds about 2,000 cache-write tokens to each fresh session. On Fable 5.2 the extra thinking adds to it.
 
 ## Private set
 
@@ -61,23 +76,43 @@ Both prompt sets run one prompt per fresh session. The 1.2.0 text was checked in
 
 The two forms the new rules name went to 0 on both models. Metaphor, cadence and bloat as the judge counts them did not move. The 6 first-person words on Opus 5.5 are self-corrections and opinion markers ("Correction to my last reply", "my pick (opinion)"). Rewriting the other rules in instruction form came after this check and has no run of its own.
 
+The same conversation ran again on 2026-11-11 with the 1.2.2 text, with no setting sources. Fable 5.2 also ran it without the plugin.
+
+| | Fable 5.2, vanilla | Fable 5.2, 1.2.2 | Fable 5.1, 1.2.2 | Opus 5.5, 1.2.2 |
+|---|---|---|---|---|
+| Words, 10 replies | 3,622 | 1,835 | 1,745 | 2,345 |
+| Median reply | 333 | 165 | 167 | 209 |
+| Bold lead-ins | 81 | 0 | 2 | 3 |
+| Label lines | 2 | 0 | 6 | 3 |
+| Headers | 15 | 0 | 0 | 6 |
+| First-person words | 15 | 1 | 1 | 5 |
+| ", not" sentences | 8 | 2 | 0 | 4 |
+| Em or en dashes | 0 | 0 | 0 | 0 |
+| Judge violations per 1k words | 5.0 | 4.4 | 6.3 | 6.8 |
+| Judge metaphor hits | 7 | 0 | 1 | 5 |
+| List-price cost, whole conversation | $3.54 | $2.02 | $2.50 | $1.04 |
+
+Fable 5.2 is the one model with 0 bold lead-ins, 0 label lines and 0 headers over the 10 turns. Its conversation cost 43% less with the plugin, because each later turn pays for the shorter earlier replies as context.
+
 The Flask prompt from the README ran 4 times on Opus 5.5 with the shipped 1.2.0 text. Word counts: 148, 176, 180 and 189. Bold lead-ins appeared in 2 of the 4 replies.
 
 ## Daily use
 
-A scan of one user's sessions from 2026-09-04 to 2026-09-29, all Fable 5.1 final replies, grouped by how the rules reached the model. Three CLAUDE.md texts came before the plugin. Dashes were 0 in every group.
+A scan of one user's sessions from 2026-09-04 to 2026-09-29, all Fable 5.1 final replies, grouped by how the rules reached the model. Three CLAUDE.md texts came before the plugin. Dashes were 0 in every group. A second scan covers 2026-10-01 to 2026-11-11 with plugin 1.2.1, again all Fable 5.1 replies, with 1 dash in 386 replies.
 
-| | Style text in CLAUDE.md | Voice text in CLAUDE.md | 18 rules in CLAUDE.md | Plugin 1.0.0 | Plugin 1.1.0 |
-|---|---|---|---|---|---|
-| Replies | 50 | 121 | 54 | 586 | 102 |
-| Median words | 307 | 223 | 159 | 138 | 150 |
-| Over 150 words | 80% | 65% | 52% | 47% | 49% |
-| ", not" per 1k words | 0.73 | 1.17 | 1.38 | 0.95 | 0.37 |
-| Replies with a closing offer | 4% | 3% | 0% | 2% | 1% |
-| First person per 1k words | 5.9 | 5.0 | 7.6 | 5.7 | 5.2 |
-| Replies with first person | 80% | 70% | 61% | 51% | 31% |
+| | Style text in CLAUDE.md | Voice text in CLAUDE.md | 18 rules in CLAUDE.md | Plugin 1.0.0 | Plugin 1.1.0 | Plugin 1.2.1 |
+|---|---|---|---|---|---|---|
+| Replies | 50 | 121 | 54 | 586 | 102 | 386 |
+| Median words | 307 | 223 | 159 | 138 | 150 | 162 |
+| Over 150 words | 80% | 65% | 52% | 47% | 49% | 54% |
+| ", not" per 1k words | 0.73 | 1.17 | 1.38 | 0.95 | 0.37 | 0.20 |
+| Replies with a closing offer | 4% | 3% | 0% | 2% | 1% | 1% |
+| First person per 1k words | 5.9 | 5.0 | 7.6 | 5.7 | 5.2 | 0.5 |
+| Replies with first person | 80% | 70% | 61% | 51% | 31% | 6% |
 
 Length moved with each rewrite of the text. First person per 1,000 words stayed between 5.0 and 7.6 under every text, including the two that ban it. The share of replies with any first person fell from 80% to 31%. The remaining hits are the agent describing its own next action ("I'll tell you when the compile finishes"). Single-prompt runs and the 10-turn check above produced 0 to 4 such words in 10 replies. The form appears in interactive sessions with real tool work, which no benchmark here reproduces.
+
+With plugin 1.2.1 first person fell to 0.5 per 1,000 words and to 6% of replies. The 1.2.0 text added the reply shape, restated the rules as instructions and lengthened the per-turn reminder. Length did not move: the median is 162 words and 54% of replies run over 150. No Fable 5.2 session is in the scan.
 
 ## Scorer and judge
 

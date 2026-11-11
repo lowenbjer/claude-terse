@@ -2,7 +2,7 @@
 
 One run of the 12 public prompts per setup, one pull request. Cost is about $1 per run on Opus 5.5 at list price, more on larger models.
 
-1. Install the plugin: `/plugin marketplace add lowenbjer/claude-terse` and `/plugin install terse@terse`.
+1. Clone this repository. The runner loads the plugin from the checkout and ignores your own settings and installed plugins.
 2. Run the terse setup: `python3 bench/run.py <model-id> <label>`.
 3. Run vanilla: `python3 bench/run.py <model-id> <label>-vanilla --vanilla`.
 4. Optional judge pass, about $0.07 per chat reply: add `--judge` to both.
