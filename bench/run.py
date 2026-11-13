@@ -8,6 +8,7 @@ Usage:
   --vanilla   run without the plugin
   --effort    effort level passed to claude, default high
   --judge     also run judge.py on each chat reply (about $0.07 per reply)
+  --judge-passes  judge passes per chat reply, default 1; the summary reports the mean
   --ids       comma-separated prompt ids to run, for example s01,s12
 
 Each prompt runs once in a fresh empty directory with `claude -p` and no
@@ -63,6 +64,7 @@ def main():
     vanilla = "--vanilla" in args
     judge_on = "--judge" in args
     effort = args[args.index("--effort") + 1] if "--effort" in args else "high"
+    judge_passes = int(args[args.index("--judge-passes") + 1]) if "--judge-passes" in args else 1
     out_dir = os.path.join(HERE, "out", label)
     os.makedirs(out_dir, exist_ok=True)
     prompts = json.load(open(os.path.join(HERE, "showcase_prompts.json")))
@@ -85,7 +87,8 @@ def main():
         }
         if judge_on and p["kind"] == "chat" and text:
             from judge import judge
-            row["judge"] = judge(text)[0]
+            row["judge_passes"] = judge(text, judge_passes)
+            row["judge"] = row["judge_passes"][0]
         rows.append(row)
         with open(os.path.join(out_dir, p["id"] + ".json"), "w") as f:
             json.dump({"prompt": p, "response": res, "row": row}, f, indent=1)
@@ -109,9 +112,15 @@ def main():
         "models_reported": sorted({m for r in rows for m in r["model_reported"]}),
     }
     if judge_on:
-        judged = [r for r in chat if "judge" in r and "total_violations" in r["judge"]]
-        words = sum(r["words"] for r in judged) or 1
-        summary["judge_violations_per_1k"] = round(sum(r["judge"]["total_violations"] for r in judged) / words * 1000, 1)
+        # Mean violations per reply over the passes that returned a count.
+        means = {}
+        for r in chat:
+            counts = [j["total_violations"] for j in r.get("judge_passes", []) if "total_violations" in j]
+            if counts:
+                means[r["id"]] = sum(counts) / len(counts)
+        words = sum(r["words"] for r in chat if r["id"] in means) or 1
+        summary["judge_passes"] = judge_passes
+        summary["judge_violations_per_1k"] = round(sum(means.values()) / words * 1000, 1)
     with open(os.path.join(out_dir, "summary.json"), "w") as f:
         json.dump(summary, f, indent=1)
     row_md = "| %s | %s | %s | %d | %d | %d | $%.2f | %d | %d | %d | %d |" % (

@@ -58,7 +58,7 @@ The conversation from [docs/benchmark.md](../benchmark.md#multi-turn-check) ran 
 | | vanilla | terse | change |
 |---|---|---|---|
 | Words, 10 replies | 3,622 | 1,835 | -49% |
-| Median reply | 333 words | 165 words | -51% |
+| Median reply | 333 words | 165 words | -50% |
 | Bold lead-ins | 81 | 0 | -100% |
 | Label lines | 2 | 0 | -100% |
 | Headers | 15 | 0 | -100% |

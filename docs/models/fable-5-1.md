@@ -34,7 +34,7 @@ Run on 2026-11-11 with Claude Code 2.1.322, effort high, same 12 prompts, terse 
 | | vanilla | terse 1.2.2 | change |
 |---|---|---|---|
 | Words, 10 chat replies | 3,770 | 1,772 | -53% |
-| Median reply | 399 words | 186 words | -54% |
+| Median reply | 399 words | 186 words | -53% |
 | Output tokens, 12 runs | 10,433 | 6,035 | -42% |
 | Thinking tokens, 12 runs | 278 | 0 | |
 | List-price cost, 12 runs | $2.67 | $2.94 | +10% |

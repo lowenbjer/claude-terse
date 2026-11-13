@@ -8,7 +8,7 @@ Two prompt sets ran through the same runner, scorer and judge. Each prompt ran o
 
 Results per model are in [docs/models](models/README.md): [Fable 5.2](models/fable-5-2.md) at effort high and medium, [Opus 5.5](models/opus-5-5.md) at effort high and medium, [Fable 5.1](models/fable-5-1.md) at effort high.
 
-All three models ran the set on 2026-11-11 with the 1.2.2 text, with no setting sources and three judge passes per chat reply.
+All three models ran the set on 2026-11-11 with the 1.2.2 text, with no setting sources and three judge passes per chat reply (`--judge --judge-passes 3`).
 
 | | Fable 5.2 | Fable 5.1 | Opus 5.5 |
 |---|---|---|---|
@@ -110,14 +110,14 @@ A scan of one user's sessions from 2026-09-04 to 2026-09-29, all Fable 5.1 final
 | First person per 1k words | 5.9 | 5.0 | 7.6 | 5.7 | 5.2 | 0.5 |
 | Replies with first person | 80% | 70% | 61% | 51% | 31% | 6% |
 
-Length moved with each rewrite of the text. First person per 1,000 words stayed between 5.0 and 7.6 under every text, including the two that ban it. The share of replies with any first person fell from 80% to 31%. The remaining hits are the agent describing its own next action ("I'll tell you when the compile finishes"). Single-prompt runs and the 10-turn check above produced 0 to 4 such words in 10 replies. The form appears in interactive sessions with real tool work, which no benchmark here reproduces.
+Length moved with each rewrite of the text. First person per 1,000 words fell from 5.9 to 0.5. The share of replies with any first person fell from 80% to 6%. The remaining hits are the agent describing its own next action ("I'll tell you when the compile finishes"). Single-prompt runs and the 10-turn check above produced 0 to 4 such words in 10 replies. The form appears in interactive sessions with real tool work, which no benchmark here reproduces.
 
-With plugin 1.2.1 first person fell to 0.5 per 1,000 words and to 6% of replies. The 1.2.0 text added the reply shape, restated the rules as instructions and lengthened the per-turn reminder. Length did not move: the median is 162 words and 54% of replies run over 150. No Fable 5.2 session is in the scan.
+The fall came with plugin 1.2.1. Through plugin 1.1.0 the rate stayed between 5.0 and 7.6. The 1.2.0 text added the reply shape, restated the rules as instructions and lengthened the per-turn reminder. Length did not move: the median is 162 words and 54% of replies run over 150. No Fable 5.2 session is in the scan.
 
 ## Scorer and judge
 
 [bench/score.py](../bench/score.py) counts the checkable items: dashes, first-person words ("I", "me", "my", "let me"), banned phrases, closing offers, parentheses and words. It also counts ", not" sentences, excluding numeric corrections such as "11, not 12".
 
-[bench/judge.py](../bench/judge.py) sends each reply to Opus 5 with a nine-item rubric and asks for quotes and a count. The items: metaphor, reframes, self-labeling, reader grading, cadence, closers, bloat, formal register, slogans. One judge call per reply. Judge cost was about $0.07 per reply at list price.
+[bench/judge.py](../bench/judge.py) sends each reply to Opus 5 with a nine-item rubric and asks for quotes and a count. The items: metaphor, reframes, self-labeling, reader grading, cadence, closers, bloat, formal register, slogans. The 2026-11-11 runs made three judge calls per reply and report the mean. Earlier runs made one call. Judge cost was about $0.07 per reply at list price.
 
 Both scripts are in [bench/](../bench).
