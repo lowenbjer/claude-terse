@@ -1,14 +1,16 @@
 # Benchmark
 
-Two prompt sets ran through the same runner, scorer and judge. Each prompt ran once through `claude -p`, in September 2026 and again on 2026-11-11 for the public set. The public set reruns with [bench/run.py](../bench/run.py), one command per setup, see [docs/models/CONTRIBUTING.md](models/CONTRIBUTING.md).
+This page explains how the README numbers were measured, for readers who want to check or rerun them. Two prompt sets ran through the same runner, scorer and judge. Each prompt ran once through `claude -p`, the non-interactive Claude Code command, in September 2026. The public set ran again on 2026-11-11. The public set reruns with [bench/run.py](../bench/run.py), one command per setup, see [docs/models/CONTRIBUTING.md](models/CONTRIBUTING.md).
 
 ## Public set
 
-12 prompts in [bench/showcase_prompts.json](../bench/showcase_prompts.json): 10 engineering questions, 2 short documents. `{OUT}` in the two document prompts is the directory the runner substituted. Run in an empty directory with no CLAUDE.md and no other plugins.
+12 prompts in [bench/showcase_prompts.json](../bench/showcase_prompts.json): 10 engineering questions, 2 short documents. `{OUT}` in the two document prompts is a placeholder the runner replaces with the run's working directory. Run in an empty directory with no CLAUDE.md and no other plugins.
 
 Results per model are in [docs/models](models/README.md): [Fable 5.2](models/fable-5-2.md) at effort high and medium, [Opus 5.5](models/opus-5-5.md) at effort high and medium, [Fable 5.1](models/fable-5-1.md) at effort high.
 
-All three models ran the set on 2026-11-11 with the 1.2.2 text, with no setting sources and three judge passes per chat reply (`--judge --judge-passes 3`).
+All three models ran the set on 2026-11-11 with the 1.2.2 text, the rule text of plugin version 1.2.2. The runs loaded no setting sources, so no user settings, CLAUDE.md or installed plugins applied. The judge read each chat reply three times (`--judge --judge-passes 3`). The judge rows show the mean.
+
+Judge violations are sentences an Opus 5 judge flags as breaking a rule, see [Scorer and judge](#scorer-and-judge). Bold lead-ins are list lines that open with a bold phrase. Label lines are lines of 8 words or fewer ending in a colon.
 
 | | Fable 5.2 | Fable 5.1 | Opus 5.5 |
 |---|---|---|---|
@@ -21,7 +23,7 @@ All three models ran the set on 2026-11-11 with the 1.2.2 text, with no setting 
 | Thinking tokens, 12 runs | 1,338 to 8,292 | 278 to 0 | 2,232 to 4,841 |
 | List-price cost, 12 runs | $2.15 to $2.60 (+21%) | $2.67 to $2.94 (+10%) | $1.09 to $1.17 (+7%) |
 
-Cost rises on single prompts because the plugin adds about 2,000 cache-write tokens to each fresh session. On Fable 5.2 the extra thinking adds to it.
+Cost rises on single prompts because the plugin adds about 2,000 cache-write tokens to each new session. Cache-write tokens are input stored in the prompt cache on first use, priced above normal input. On Fable 5.2, thinking also rises from 1,338 to 8,292 tokens over 12 runs.
 
 ## Private set
 
@@ -76,7 +78,7 @@ Both prompt sets run one prompt per fresh session. The 1.2.0 text was checked in
 
 The two forms the new rules name went to 0 on both models. Metaphor, cadence and bloat as the judge counts them did not move. The 6 first-person words on Opus 5.5 are self-corrections and opinion markers ("Correction to my last reply", "my pick (opinion)"). Rewriting the other rules in instruction form came after this check and has no run of its own.
 
-The same conversation ran again on 2026-11-11 with the 1.2.2 text, with no setting sources. Fable 5.2 also ran it without the plugin.
+The same conversation ran again on 2026-11-11 with the 1.2.2 text and no user settings or installed plugins. Fable 5.2 also ran it without the plugin.
 
 | | Fable 5.2, vanilla | Fable 5.2, 1.2.2 | Fable 5.1, 1.2.2 | Opus 5.5, 1.2.2 |
 |---|---|---|---|---|
@@ -98,7 +100,7 @@ The Flask prompt from the README ran 4 times on Opus 5.5 with the shipped 1.2.0 
 
 ## Daily use
 
-A scan of one user's sessions from 2026-09-04 to 2026-09-29, all Fable 5.1 final replies, grouped by how the rules reached the model. Three CLAUDE.md texts came before the plugin. Dashes were 0 in every group. A second scan covers 2026-10-01 to 2026-11-11 with plugin 1.2.1, again all Fable 5.1 replies, with 1 dash in 386 replies.
+A scan of one user's sessions from 2026-09-04 to 2026-09-29, all Fable 5.1 final replies, grouped by how the rules reached the model. Three CLAUDE.md texts came before the plugin. Dashes were 0 in every group. A second scan covers 386 Fable 5.1 replies from 2026-10-01 to 2026-11-11 with plugin 1.2.1. It found 1 dash.
 
 | | Style text in CLAUDE.md | Voice text in CLAUDE.md | 18 rules in CLAUDE.md | Plugin 1.0.0 | Plugin 1.1.0 | Plugin 1.2.1 |
 |---|---|---|---|---|---|---|
@@ -112,7 +114,7 @@ A scan of one user's sessions from 2026-09-04 to 2026-09-29, all Fable 5.1 final
 
 Length moved with each rewrite of the text. First person per 1,000 words fell from 5.9 to 0.5. The share of replies with any first person fell from 80% to 6%. The remaining hits are the agent describing its own next action ("I'll tell you when the compile finishes"). Single-prompt runs and the 10-turn check above produced 0 to 4 such words in 10 replies. The form appears in interactive sessions with real tool work, which no benchmark here reproduces.
 
-The fall came with plugin 1.2.1. Through plugin 1.1.0 the rate stayed between 5.0 and 7.6. The 1.2.0 text added the reply shape, restated the rules as instructions and lengthened the per-turn reminder. Length did not move: the median is 162 words and 54% of replies run over 150. No Fable 5.2 session is in the scan.
+The fall came with plugin 1.2.1. Through plugin 1.1.0 the rate stayed between 5.0 and 7.6. The 1.2.0 text added the reply shape, restated the rules as instructions and lengthened the per-turn reminder. Length did not fall. The median is 162 words against 150 with plugin 1.1.0, and 54% of replies run over 150 against 49%. No Fable 5.2 session is in the scan.
 
 ## Scorer and judge
 

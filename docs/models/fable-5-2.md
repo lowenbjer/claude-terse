@@ -1,6 +1,8 @@
 # Fable 5.2
 
-Run on 2026-11-11 with Claude Code 2.1.322, model id `claude-fable-5-2`, effort high, one run per prompt, terse 1.2.2. Every reply reported `claude-fable-5-2` as the model. The runs used no setting sources, so no user settings, no CLAUDE.md and no other plugins applied. The judge read each chat reply three times. Judge rows are the mean of the three passes.
+Benchmark results for Fable 5.2 as the main model, with and without the terse plugin.
+
+Run on 2026-11-11 with Claude Code 2.1.322, model id `claude-fable-5-2`, effort high, one run per prompt, terse 1.2.2. Every reply reported `claude-fable-5-2` as the model. The runs used no setting sources, so no user settings, no CLAUDE.md and no other plugins applied. An Opus 5 judge read each chat reply three times and counted rule breaks. Judge rows are the mean of the three passes. Vanilla is Claude Code without the plugin.
 
 | | vanilla | terse | change |
 |---|---|---|---|
@@ -22,16 +24,18 @@ Run on 2026-11-11 with Claude Code 2.1.322, model id `claude-fable-5-2`, effort 
 | Bloat per 1k | 2.84 | 1.21 | -57% |
 | Closers per 1k | 0.53 | 0.0 | -100% |
 
+Bold lead-ins are list lines that open with a bold phrase. Label lines are lines of 8 words or fewer ending in a colon. The other row names are defined in the [README](../../README.md).
+
 Words per prompt, vanilla to terse: 272 to 182, 337 to 148, 402 to 181, 562 to 183, 417 to 167, 135 to 90, 390 to 187, 678 to 229, 425 to 173, 144 to 109. Documents: 80 to 60 and 1,149 to 513.
 
-Findings:
+## Findings
 
 - The three judge passes counted 4, 5 and 4 violations in the 10 terse replies. The same rule text on Fable 5.1 on the same day gave 12, 11 and 13.
-- Metaphor falls to 1 hit in 1,649 words. No rule text had moved Fable 5.1 below 3.3 per 1,000 words. The one hit is the heading word "Bites", which repeats the prompt's own wording.
-- One of the judged violations is "(opinion)", which rule 11 asks for.
+- Metaphor falls to 1 hit in 1,649 words. No rule text had moved Fable 5.1 below 3.3 per 1,000 words. The one hit is the word "Bites" in a table column, which repeats the prompt's own wording.
+- One judged violation is "(opinion)", the marker rule 11 asks for.
 - Thinking rises from 1,338 to 8,292 tokens over 12 runs. Visible output on the 10 chat prompts falls from 7,949 to 3,521 tokens. Billed output tokens rise 8%.
-- Cost per single-prompt session rises 21%. The plugin adds about 2,000 cache-write tokens to each fresh session, and the extra thinking is billed as output.
-- 7 of 10 terse replies run over the 150-word cap. The longest is 229 words.
+- Cost per single-prompt session rises 21%. The plugin adds about 2,000 cache-write tokens, input stored in the prompt cache, to each new session. The extra thinking is billed as output.
+- 7 of 10 terse replies run over the rules' 150-word cap on chat replies. The longest is 229 words.
 - Vanilla Fable 5.2 writes the same length as vanilla Fable 5.1 on this set, 3,762 against 3,770 words. It writes 14 headers where Fable 5.1 writes 1.
 
 ## Second run and effort medium
@@ -49,11 +53,11 @@ The 10 chat prompts ran a second time at effort high and once at effort medium, 
 | Label lines | 5 | 4 | | 10 | 5 | |
 | Judge violations per 1k words | 11.1 | 3.1 | -72% | 10.2 | 3.0 | -71% |
 
-Chat words with terse were 1,649, 1,599 and 1,687 across the three runs. Effort medium lowers thinking by 28% and leaves length and violations level.
+Chat words with terse were 1,649, 1,599 and 1,687 across the three runs. Effort medium lowers thinking by 28%. Length and violations stay level.
 
 ## 10-turn conversation
 
-The conversation from [docs/benchmark.md](../benchmark.md#multi-turn-check) ran once without the plugin and once with terse 1.2.2, effort high.
+The 10-turn conversation about this repository from [docs/benchmark.md](../benchmark.md#multi-turn-check) ran once without the plugin and once with terse 1.2.2, effort high.
 
 | | vanilla | terse | change |
 |---|---|---|---|
@@ -70,4 +74,4 @@ The conversation from [docs/benchmark.md](../benchmark.md#multi-turn-check) ran 
 
 Cost falls in the conversation because each later turn pays for the shorter earlier replies as context. 7 of the 8 violations left are bloat.
 
-Not measured: the 40-prompt private set, subagent output, and sessions with real tool work.
+The 40-prompt private set, subagent output and sessions with real tool work have no Fable 5.2 run.

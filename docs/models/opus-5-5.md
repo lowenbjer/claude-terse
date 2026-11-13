@@ -56,7 +56,7 @@ Words per prompt, terse 1.1.0: 185, 181, 180, 182, 173, 93, 195, 299, 175, 130. 
 
 ## Version 1.2.2 rerun
 
-Run on 2026-11-11 with Claude Code 2.1.322, effort high, same 12 prompts, terse 1.2.2. The runs used no setting sources, so no user settings and no other plugins applied. Judge rows are the mean of three passes. Vanilla is a new run too, so the columns do not line up with the tables above.
+Run on 2026-11-11 with Claude Code 2.1.322, effort high, same 12 prompts, terse 1.2.2. The runs used no setting sources, so no user settings and no other plugins applied. The judge read each chat reply three times. Judge rows are the mean. Vanilla, Claude Code without the plugin, is a new run too. Its numbers differ from the vanilla columns above.
 
 | | vanilla | terse 1.2.2 | change |
 |---|---|---|---|
