@@ -2,10 +2,10 @@
 
 One run of the 12 public prompts per setup, one pull request. Cost is about $1 per run on Opus 5.5 at list price, more on larger models.
 
-1. Install the plugin: `/plugin marketplace add lowenbjer/claude-terse` and `/plugin install terse@terse`.
+1. Clone this repository. The runner loads the plugin from the checkout and ignores your own settings and installed plugins.
 2. Run the terse setup: `python3 bench/run.py <model-id> <label>`.
 3. Run vanilla: `python3 bench/run.py <model-id> <label>-vanilla --vanilla`.
-4. Optional judge pass, about $0.07 per chat reply: add `--judge` to both.
+4. Optional judge pass, about $0.07 per chat reply: add `--judge` to both. The judge is Opus 5 counting rule breaks in each chat reply. `--judge-passes 3` reads each reply three times and reports the mean.
 5. Open `bench/out/<label>/summary.json` and `row.md` for both runs.
 6. Create `docs/models/<model>.md` with the date, Claude Code version, effort, the model id every reply reported (`models_reported` in summary.json), a table of vanilla against terse, and 2 to 5 findings from reading the replies.
 7. Add one row per setup to the table in `docs/models/README.md`.

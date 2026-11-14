@@ -21,7 +21,7 @@ So I spent a few weeks nothing down every thing it did that annoyed me and what 
 
 ***The rest of this README is co-written by Claude Code using the terse plugin. I take most of the credit, but none for the words.***
 
-A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.1: 46% fewer words, 51% lower cost. Opus 5.5: 54% fewer words, 32% lower cost. [Measured](docs/benchmark.md) on 20 prompts against a real codebase.** The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
+A Claude Code plugin that cuts reply length in half and removes mannered prose. **Fable 5.2: 56% fewer words, 78% fewer style violations. Opus 5.5: 63% fewer words, 85% fewer. Fable 5.1: 53% fewer words, 61% fewer. [Measured](docs/benchmark.md) on 10 public chat prompts against vanilla Claude Code.** Long sessions cost less. A 10-turn conversation on Fable 5.2 cost 43% less. On 20 prompts against a real codebase, cost fell 32% on Opus 5.5 and 51% on Fable 5.1. A single short prompt costs 7% to 21% more. The writing rules apply to replies, documents, commits and subagents. A context meter for the status line comes with it.
 
 The tables use these terms.
 
@@ -33,9 +33,33 @@ The tables use these terms.
 - Cadence is rhythm built for effect, such as triads and punchline endings.
 - Bloat is a sentence that adds no fact, including narration like "I'll look at the code now".
 - First person is "I", "me", "my", "let me" and their contractions. Sentences whose subject is the writer.
+- Bold lead-ins are list lines that open with a bold phrase. Label lines are lines of 8 words or fewer ending in a colon. Rule 21 treats both as headers.
 - Output tokens are what the model wrote, thinking included. Output tokens are priced about five times higher than input tokens on Opus and Fable.
+- Thinking tokens are the reasoning the model writes before its visible reply.
+- Cache-write tokens are input tokens stored in the prompt cache on first use, priced above normal input.
+- Effort is the Claude Code setting for how much the model reasons, high or medium.
+- Three judge passes means the judge read each reply three times. The table shows the mean.
+- The public set is 12 prompts published in this repository. The private set is 40 prompts against a private codebase.
+- The 1.2.2 text is the rule text shipped in plugin version 1.2.2.
 
-Measured on 12 public prompts, vanilla Claude Code against terse 1.1.0. Opus 5.5, effort high, one run each.
+Measured on 12 public prompts, vanilla Claude Code against terse 1.2.2. Fable 5.2, effort high, one run each, three judge passes.
+
+| | vanilla | terse | change |
+|---|---|---|---|
+| Words, 10 chat replies | 3,762 | 1,649 | -56% |
+| Median reply | 396 words | 177 words | -55% |
+| Style violations per 1k words (Opus judge) | 12.0 | 2.6 | -78% |
+| First person per 1k | 2.66 | 0.0 | -100% |
+| "X, not Y" reframes per 1k | 1.59 | 0.0 | -100% |
+| Metaphor per 1k | 5.85 | 0.61 | -90% |
+| Bold lead-ins, 10 chat replies | 73 | 0 | -100% |
+| Em or en dashes, 12 replies | 2 | 0 | -100% |
+| Thinking tokens, 12 runs | 1,338 | 8,292 | |
+| List-price cost, 12 runs | $2.15 | $2.60 | +21% |
+
+A second run of the 10 chat prompts gave 1,599 words and 3.1 violations per 1k. In a 10-turn conversation, Fable 5.2 with terse wrote 0 bold lead-ins, 0 label lines, 0 headers and 0 metaphors. That conversation cost $2.02 with the plugin and $3.54 without.
+
+The same prompts on Opus 5.5 with terse 1.1.0, effort high, one run each, measured in September.
 
 | | vanilla | terse | change |
 |---|---|---|---|
@@ -48,7 +72,7 @@ Measured on 12 public prompts, vanilla Claude Code against terse 1.1.0. Opus 5.5
 | Slogans per 1k | 1.17 | 0.0 | -100% |
 | Metaphor per 1k | 3.69 | 0.0 | -100% |
 
-Tables for Fable 5.1, for Opus 5.5 at effort medium, and for the 1.0.0 rule text: [docs/models](docs/models/README.md). Method, prompts and the judge rubric: [docs/benchmark.md](docs/benchmark.md).
+Tables for Fable 5.1, for Opus 5.5 with the 1.2.2 text and at effort medium, and for the 1.0.0 rule text: [docs/models](docs/models/README.md). Method, prompts and the judge rubric: [docs/benchmark.md](docs/benchmark.md).
 
 ## Install
 
@@ -167,12 +191,15 @@ Both replies name scheduled jobs, lock waits and pool exhaustion. The vanilla on
 
 ## Measured limits
 
-- Opus 5.5 and Fable 5.1 are the measured main agents. Opus 5 and Sonnet 5 ran only as subagents. With the rules in context, Opus 5 kept 13 em dashes per 1k words and Sonnet put a dash in 1 reply of 5. No numbers exist for either as the main model. Per-model tables: [docs/models](docs/models/README.md).
-- Metaphor drops to 0 on the public set and by half on the private set. Opus 5.5 with the 1.1.0 text: 3.69 to 0.0 per 1k on 12 public prompts, 3.09 to 1.57 on 20 private prompts. Fable 5.1 with the 1.0.0 text: 7.2 to 3.3 on the public set.
-- The 150-word cap shortens replies without enforcing the limit. Chat words fell 46 to 70 percent across two prompt sets and two models. Long analysis questions still run over.
+- Opus 5.5, Fable 5.1 and Fable 5.2 are the measured main agents. Opus 5 and Sonnet 5 ran only as subagents. With the rules in context, Opus 5 kept 13 em dashes per 1k words and Sonnet put a dash in 1 reply of 5. No numbers exist for either as the main model. Per-model tables: [docs/models](docs/models/README.md).
+- Metaphor drops close to zero on the public set and by half on the private set. Opus 5.5 with the 1.1.0 text: 3.69 to 0.0 per 1k on 12 public prompts, 3.09 to 1.57 on 20 private prompts. Fable 5.1 with the 1.0.0 text: 7.2 to 3.3 on the public set, and 6.6 to 3.8 with the 1.2.2 text. Fable 5.2 with the 1.2.2 text: 5.85 to 0.61.
+- The 150-word cap shortens replies without enforcing the limit. Chat words fell 46 to 70 percent across two prompt sets and three models. Long analysis questions still run over. On Fable 5.2, 7 of 10 public-set replies ran over 150 words, with a median of 177. In one user's sessions on Fable 5.1 with plugin 1.2.1, 54% of 386 replies ran over.
 - Subagent output followed the subagent model. In a Fable 5.1 session, Explore-type subagents ran Opus 5 and kept 13 em dashes per 1k words with the rules in their context. Fable subagents produced 0.1 per 1k without any rules. In an Opus 5.5 session, the subagents ran Opus 5.5 and wrote 0.4 per 1k without the rules and 0 with them. To pick the subagent model, set `CLAUDE_CODE_SUBAGENT_MODEL` to your main model, or ask for general-purpose subagents, which inherit it.
-- The reply shape and rule 21 removed the two forms they name and no others. The check was a 10-turn conversation with the same prompts on both models. Bold lead-ins went from 20 to 0 on Fable 5.1 and from 36 to 0 on Opus 5.5. Label lines went from 10 to 4 and from 8 to 0. Judge-counted metaphor, cadence and bloat stayed level. Reply length stayed level. Table in [docs/benchmark.md](docs/benchmark.md#multi-turn-check). The 1.2.0 text has no public-set rerun. The tables above are the 1.1.0 text.
+- In the 1.2.0 check, the reply shape and rule 21 removed the two forms they name and no others. The check was a 10-turn conversation with the same prompts on both models. Bold lead-ins went from 20 to 0 on Fable 5.1 and from 36 to 0 on Opus 5.5. Label lines went from 10 to 4 and from 8 to 0. Judge-counted metaphor, cadence and bloat stayed level. Reply length stayed level. Table in [docs/benchmark.md](docs/benchmark.md#multi-turn-check). On the public set with the 1.2.2 text, bold lead-ins in 10 chat replies were 0 on Fable 5.2, 0 on Fable 5.1 and 19 on Opus 5.5. Label lines were 2, 8 and 8.
 - Cost fell less than words. Output tokens fell 42 to 55 percent. Context tokens are most of the cost per call. Total cost fell 2 percent on the short public set with the 1.1.0 text and 9 to 12 percent with the 1.0.0 text. The reminder adds about 100 uncached tokens per turn. Thinking rose from 2,150 tokens over 12 runs with the 1.0.0 text to 4,155 with 1.1.0. On 20 chat prompts against a real codebase with a large CLAUDE.md, cost fell 51 percent on Fable 5.1 with the 1.0.0 text. On Opus 5.5 with the 1.1.0 text it fell 32 percent.
+- With the 1.2.2 text and no other settings, cost on the public set rose 21 percent on Fable 5.2, 10 percent on Fable 5.1 and 7 percent on Opus 5.5. The plugin adds about 2,000 cache-write tokens to each new session. Fable 5.2 also thinks more with the rules: 8,292 tokens over 12 runs against 1,338. Over a 10-turn conversation on Fable 5.2, cost fell 43 percent, from $3.54 to $2.02.
+- The Flask prompt in the example above shares wording with the rule text. One before/after pair in the rules is "pg_stat_activity during 08:55 to 09:15 first". Fable 5.2 opened its reply to that prompt with the same words. A second pair, "Compare Gunicorn workers with pool_size", comes from the same prompt.
+- First person in real sessions fell after 1.2.0. One user's Fable 5.1 sessions had it in 31% of replies with plugin 1.1.0. With plugin 1.2.1 it was in 6% of 386 replies. None of those sessions ran Fable 5.2. Table in [docs/benchmark.md](docs/benchmark.md#daily-use).
 
 ## Add your model
 

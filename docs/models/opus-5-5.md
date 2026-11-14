@@ -54,6 +54,36 @@ Words per prompt, terse 1.1.0: 185, 181, 180, 182, 173, 93, 195, 299, 175, 130. 
 - The one reframe is "Filter rows before joining, not after", an ordering statement the scorer and judge both count.
 - Thinking tokens doubled and the reminder adds 70 uncached tokens per turn, so cost per run rose from $0.062 to $0.068, 2% under vanilla on these one-turn prompts.
 
+## Version 1.2.2 rerun
+
+Run on 2026-11-11 with Claude Code 2.1.322, effort high, same 12 prompts, terse 1.2.2. The runs used no setting sources, so no user settings and no other plugins applied. The judge read each chat reply three times. Judge rows are the mean. Vanilla, Claude Code without the plugin, is a new run too. Its numbers differ from the vanilla columns above.
+
+| | vanilla | terse 1.2.2 | change |
+|---|---|---|---|
+| Words, 10 chat replies | 5,424 | 1,989 | -63% |
+| Median reply | 583 words | 186 words | -68% |
+| Output tokens, 12 runs | 17,716 | 11,399 | -36% |
+| Thinking tokens, 12 runs | 2,232 | 4,841 | |
+| List-price cost, 12 runs | $1.09 | $1.17 | +7% |
+| Em or en dashes, 12 replies | 1 | 0 | -100% |
+| First person per 1k words | 1.84 | 0.0 | -100% |
+| Bold lead-ins, 10 chat replies | 104 | 19 | -82% |
+| Label lines, 10 chat replies | 14 | 8 | -43% |
+| Headers, 10 chat replies | 36 | 0 | -100% |
+| Judge violations per 1k words | 12.3 | 1.8 | -85% |
+| Metaphor per 1k | 3.75 | 0.0 | -100% |
+| "X, not Y" reframes per 1k | 0.98 | 0.0 | -100% |
+| Slogans per 1k | 0.92 | 0.0 | -100% |
+| Cadence per 1k | 1.35 | 0.0 | -100% |
+| Bloat per 1k | 3.50 | 1.34 | -62% |
+| Closers per 1k | 1.72 | 0.0 | -100% |
+
+Words per prompt, vanilla to terse: 485 to 188, 550 to 179, 624 to 169, 855 to 239, 631 to 266, 128 to 102, 616 to 183, 722 to 300, 547 to 216, 266 to 147. Documents: 86 to 82 and 979 to 482.
+
+- The three judge passes counted 2, 5 and 4 violations in the 10 terse replies, with 0 metaphors in each pass.
+- 19 bold lead-ins remain in the 10 chat replies against rule 21. Fable 5.1 and Fable 5.2 wrote 0 with the same text.
+- In the 10-turn conversation with the 1.2.2 text, Opus 5.5 wrote 2,345 words, 3 bold lead-ins, 6 headers and 16 judged violations, 5 of them metaphors, see [docs/benchmark.md](../benchmark.md#multi-turn-check).
+
 ## Private set
 
 Run on 2026-09-24, effort high, 40 prompts against a private codebase, see [docs/benchmark.md](../benchmark.md) for the prompt mix and the baseline definition. The baseline has the 1,886-word rule text in the project CLAUDE.md and nine other plugins enabled. The terse runs have the plugin and nothing else, once with the 1.0.0 text and once with 1.1.0.
